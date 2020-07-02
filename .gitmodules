@@ -1,3 +1,9 @@
 [submodule "nrmake"]
 	path = nrmake
 	url = https://gitlab.com/btmcg/nrmake.git
+[submodule "third_party/catch2/2.12.3"]
+	path = third_party/catch2/2.12.3
+	url = https://github.com/catchorg/Catch2.git
+[submodule "third_party/gmt/6.2.1"]
+	path = third_party/fmt/6.2.1
+	url = https://github.com/fmtlib/fmt.git
