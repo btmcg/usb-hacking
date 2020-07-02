@@ -1,0 +1,3 @@
+[submodule "nrmake"]
+	path = nrmake
+	url = https://gitlab.com/btmcg/nrmake.git
