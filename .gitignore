@@ -17,3 +17,6 @@ tags
 src/version.hpp
 benchmark/benchmark-runner
 test/test-runner
+
+# project executables
+src/usb-hw/usb-hw
