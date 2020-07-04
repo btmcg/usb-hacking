@@ -1,0 +1,72 @@
+Checks:                 'clang-diagnostic-*,
+                         clang-analyzer-*,
+                         bugprone-*,
+                         cppcoreguidelines-*,
+                         misc-*,
+                         modernize-*,
+                         performance-*,
+                         readability-identifier-naming,
+                         -cppcoreguidelines-avoid-c-arrays,
+                         -cppcoreguidelines-no-malloc,
+                         -cppcoreguidelines-owning-memory,
+                         -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+                         -cppcoreguidelines-pro-type-const-cast,
+                         -cppcoreguidelines-pro-type-reinterpret-cast,
+                         -cppcoreguidelines-pro-type-vararg,
+                         -modernize-avoid-c-arrays,
+                         -modernize-use-nodiscard,
+                         -modernize-use-trailing-return-type'
+#Checks:                'readability-*'
+AnalyzeTemporaryDtors:  false
+FormatStyle:            file
+HeaderFilterRegex:      '.*'
+WarningsAsErrors:       ''
+CheckOptions:
+  - key:    bugprone-assert-side-effect.AssertMacros
+    value:  assert, DEBUG_ASSERT
+  - key:    cppcoreguidelines-macro-usage.AllowedRegexp
+    value:  PACKED|DEBUG_ASSERT
+  - key:    readability-identifier-naming.ClassCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ClassMethodCase
+    value:  lower_case
+  - key:    readability-identifier-naming.EnumCase
+    value:  CamelCase
+  - key:    readability-identifier-naming.FunctionCase
+    value:  lower_case
+  - key:    readability-identifier-naming.GlobalFunctionCase
+    value:  lower_case
+  - key:    readability-identifier-naming.IgnoreMainLikeFunctions
+    value:  1
+  - key:    readability-identifier-naming.InlineNamespaceCase
+    value:  lower_case
+  - key:    readability-identifier-naming.LocalVariableCase
+    value:  lower_case
+  - key:    readability-identifier-naming.MacroDefinitionCase
+    value:  UPPER_CASE
+  - key:    readability-identifier-naming.MethodCase
+    value:  lower_case
+  - key:    readability-identifier-naming.NamespaceCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ParameterCase
+    value:  lower_case
+  - key:    readability-identifier-naming.PublicMemberCase
+    value:  lower_case
+  - key:    readability-identifier-naming.PrivateMemberSuffix
+    value:  _
+  - key:    readability-identifier-naming.StaticConstantCase
+    value:  lower_case
+  - key:    readability-identifier-naming.StaticVariableCase
+    value:  lower_case
+  - key:    readability-identifier-naming.StructCase
+    value:  lower_case
+  - key:    readability-identifier-naming.TemplateParameterCase
+    value:  CamelCase
+  - key:    readability-identifier-naming.TypeAliasCase
+    value:  lower_case
+  - key:    readability-identifier-naming.TypedefCase
+    value:  lower_case
+  - key:    readability-identifier-naming.UnionCase
+    value:  lower_case
+  - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:  1
