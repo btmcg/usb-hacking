@@ -102,8 +102,13 @@ bool
 print_device_desc(libusb_device* dev)
 {
     DEBUG_ASSERT(dev != nullptr);
-
     bool success = true;
+
+    fmt::print("  bus:                {}\n"
+               "  port:               {}\n"
+               "  speed:              {}\n",
+               ::libusb_get_bus_number(dev), ::libusb_get_port_number(dev),
+               to_str(static_cast<libusb_speed>(::libusb_get_device_speed(dev))));
 
     libusb_device_descriptor dd;
     int rv = ::libusb_get_device_descriptor(dev, &dd);

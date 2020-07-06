@@ -10,6 +10,7 @@
 constexpr char const* to_str(libusb_class_code) noexcept;
 constexpr char const* to_str(libusb_iso_sync_type) noexcept;
 constexpr char const* to_str(libusb_iso_usage_type) noexcept;
+constexpr char const* to_str(libusb_speed) noexcept;
 constexpr char const* to_str(libusb_transfer_type) noexcept;
 
 // endpoint_descriptor helpers
@@ -81,6 +82,23 @@ to_str(libusb_iso_usage_type t) noexcept
     }
     // clang-format on
     return "unknown";
+}
+
+constexpr char const*
+to_str(libusb_speed e) noexcept
+{
+    // clang-format off
+    switch (e) {
+        case LIBUSB_SPEED_UNKNOWN:      return "unknown";
+        case LIBUSB_SPEED_LOW:          return "low (1.5 MBit/s)";
+        case LIBUSB_SPEED_FULL:         return "full (12 MBit/s)";
+        case LIBUSB_SPEED_HIGH:         return "high (480 MBit/s)";
+        case LIBUSB_SPEED_SUPER:        return "super (5000 MBit/s)";
+        case LIBUSB_SPEED_SUPER_PLUS:   return "super plus (10000 MBit/s)";
+    }
+    // clang-format on
+
+    return "<unknown>";
 }
 
 constexpr char const*
