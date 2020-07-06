@@ -57,10 +57,10 @@ to_str(libusb_class_code c) noexcept
 }
 
 constexpr char const*
-to_str(libusb_iso_sync_type t) noexcept
+to_str(libusb_iso_sync_type e) noexcept
 {
     // clang-format off
-    switch (t) {
+    switch (e) {
         case LIBUSB_ISO_SYNC_TYPE_NONE:     return "no synchronization";
         case LIBUSB_ISO_SYNC_TYPE_ASYNC:    return "asynchronous";
         case LIBUSB_ISO_SYNC_TYPE_ADAPTIVE: return "adaptive";
@@ -72,10 +72,10 @@ to_str(libusb_iso_sync_type t) noexcept
 }
 
 constexpr char const*
-to_str(libusb_iso_usage_type t) noexcept
+to_str(libusb_iso_usage_type e) noexcept
 {
     // clang-format off
-    switch (t) {
+    switch (e) {
         case LIBUSB_ISO_USAGE_TYPE_DATA:        return "data endpoint";
         case LIBUSB_ISO_USAGE_TYPE_FEEDBACK:    return "feedback endpoint";
         case LIBUSB_ISO_USAGE_TYPE_IMPLICIT:    return "implicit feedback endpoint";
@@ -102,10 +102,10 @@ to_str(libusb_speed e) noexcept
 }
 
 constexpr char const*
-to_str(libusb_transfer_type t) noexcept
+to_str(libusb_transfer_type e) noexcept
 {
     // clang-format off
-    switch (t) {
+    switch (e) {
         case LIBUSB_TRANSFER_TYPE_CONTROL:      return "control";
         case LIBUSB_TRANSFER_TYPE_ISOCHRONOUS:  return "isochronous";
         case LIBUSB_TRANSFER_TYPE_BULK:         return "bulk";
