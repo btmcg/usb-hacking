@@ -53,7 +53,7 @@ to_str(libusb_class_code c) noexcept
     }
     // clang-format on
 
-    return "unknown";
+    return "<unknown>";
 }
 
 constexpr char const*
@@ -68,7 +68,7 @@ to_str(libusb_iso_sync_type e) noexcept
     }
     // clang-format on
 
-    return "unknown";
+    return "<unknown>";
 }
 
 constexpr char const*
@@ -81,7 +81,7 @@ to_str(libusb_iso_usage_type e) noexcept
         case LIBUSB_ISO_USAGE_TYPE_IMPLICIT:    return "implicit feedback endpoint";
     }
     // clang-format on
-    return "unknown";
+    return "<unknown>";
 }
 
 constexpr char const*
@@ -114,7 +114,7 @@ to_str(libusb_transfer_type e) noexcept
     }
     // clang-format on
 
-    return "unknown";
+    return "<unknown>";
 }
 
 constexpr char const*
