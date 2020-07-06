@@ -30,8 +30,7 @@ print_endpoint_desc(libusb_endpoint_descriptor const* epd)
                "              sync address:      {}\n"
                "              unknown endpoints: {}\n",
             ep_addr_to_ep_num(epd->bEndpointAddress),
-            ep_addr_to_direction_str(epd->bEndpointAddress),
-            to_str(ep_attr_to_transfer_type(epd->bmAttributes)), epd->wMaxPacketSize,
+            ep_addr_to_direction_str(epd->bEndpointAddress), attrs, epd->wMaxPacketSize,
             epd->bInterval, epd->bRefresh, epd->bSynchAddress, epd->extra_length);
 
     return true;
