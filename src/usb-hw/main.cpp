@@ -108,7 +108,8 @@ print_device_desc(libusb_device* dev)
     libusb_device_descriptor dd;
     int rv = ::libusb_get_device_descriptor(dev, &dd);
     if (rv != 0) {
-        fmt::print(stderr, "libusb_get_device_descriptor: failure ({})\n", rv);
+        fmt::print(stderr, "libusb_get_device_descriptor: failure ({})\n",
+                ::libusb_strerror(static_cast<libusb_error>(rv)));
         return false;
     }
 
@@ -136,7 +137,8 @@ print_device_desc(libusb_device* dev)
         libusb_config_descriptor* cd = nullptr;
         rv = ::libusb_get_config_descriptor(dev, config_num, &cd);
         if (rv != 0) {
-            fmt::print(stderr, "libusb_get_config_descriptor failure ({})\n", rv);
+            fmt::print(stderr, "libusb_get_config_descriptor failure ({})\n",
+                    ::libusb_strerror(static_cast<libusb_error>(rv)));
             success = false;
             break;
         }
@@ -162,13 +164,15 @@ main()
 
     int rv = ::libusb_init(&ctx);
     if (rv != 0) {
-        fmt::print(stderr, "libusb_init: failure ({})\n", rv);
+        fmt::print(stderr, "libusb_init: failure ({})\n",
+                ::libusb_strerror(static_cast<libusb_error>(rv)));
         std::exit(EXIT_FAILURE);
     }
 
     // rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
     // if (rv != 0) {
-    //     fmt::print(stderr, "libusb_set_option: failure ({})\n", rv);
+    //     fmt::print(stderr, "libusb_set_option: failure ({})\n",
+    //     ::libusb_strerror(static_cast<libusb_error>(rv)));
     //     ::libusb_exit(ctx);
     //     std::exit(EXIT_FAILURE);
     // }
@@ -176,7 +180,8 @@ main()
     libusb_device** devices = nullptr;
     ssize_t num_devs = ::libusb_get_device_list(ctx, &devices);
     if (num_devs < 0) {
-        fmt::print(stderr, "libusb_get_device_list: failure ({})\n", num_devs);
+        fmt::print(stderr, "libusb_get_device_list: failure ({})\n",
+                ::libusb_strerror(static_cast<libusb_error>(num_devs)));
         ::libusb_exit(ctx);
         ::libusb_free_device_list(devices, 1);
         std::exit(EXIT_FAILURE);
