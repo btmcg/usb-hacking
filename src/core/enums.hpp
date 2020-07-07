@@ -8,14 +8,16 @@
 
 // enum-to-string functions
 constexpr char const* to_str(libusb_class_code) noexcept;
+constexpr char const* to_str(libusb_endpoint_direction) noexcept;
 constexpr char const* to_str(libusb_iso_sync_type) noexcept;
 constexpr char const* to_str(libusb_iso_usage_type) noexcept;
 constexpr char const* to_str(libusb_speed) noexcept;
 constexpr char const* to_str(libusb_transfer_type) noexcept;
 
 // endpoint_descriptor helpers
-constexpr char const* ep_addr_to_direction_str(std::uint8_t b_endpoint_address) noexcept;
 constexpr std::uint8_t ep_addr_to_ep_num(std::uint8_t b_endpoint_address) noexcept;
+constexpr libusb_endpoint_direction ep_addr_to_endpoint_direction(
+        std::uint8_t b_endpoint_address) noexcept;
 constexpr libusb_transfer_type ep_attr_to_transfer_type(std::uint8_t bm_attributes) noexcept;
 constexpr libusb_iso_sync_type ep_attr_to_iso_sync_type(std::uint8_t bm_attributes) noexcept;
 constexpr libusb_iso_usage_type ep_attr_to_iso_usage_type(std::uint8_t bm_attributes) noexcept;
@@ -28,10 +30,10 @@ inline std::string to_version(std::uint16_t v);
 
 
 constexpr char const*
-to_str(libusb_class_code c) noexcept
+to_str(libusb_class_code e) noexcept
 {
     // clang-format off
-    switch (c) {
+    switch (e) {
         case LIBUSB_CLASS_PER_INTERFACE:        return "interface-specific";
         case LIBUSB_CLASS_AUDIO:                return "audio";
         case LIBUSB_CLASS_COMM:                 return "communications";
@@ -50,6 +52,19 @@ to_str(libusb_class_code c) noexcept
         case LIBUSB_CLASS_WIRELESS:             return "wireless";
         case LIBUSB_CLASS_APPLICATION:          return "application";
         case LIBUSB_CLASS_VENDOR_SPEC:          return "vendor-specific";
+    }
+    // clang-format on
+
+    return "<unknown>";
+}
+
+constexpr char const*
+to_str(libusb_endpoint_direction e) noexcept
+{
+    // clang-format off
+    switch (e) {
+        case LIBUSB_ENDPOINT_IN:    return "(in) host-to-device";
+        case LIBUSB_ENDPOINT_OUT:   return "(out) device-to-host";
     }
     // clang-format on
 
@@ -117,16 +132,16 @@ to_str(libusb_transfer_type e) noexcept
     return "<unknown>";
 }
 
-constexpr char const*
-ep_addr_to_direction_str(std::uint8_t addr) noexcept
-{
-    return ((addr >> 7) & 1u) ? "host-to-device" : "device-to-host";
-}
-
 constexpr std::uint8_t
 ep_addr_to_ep_num(std::uint8_t addr) noexcept
 {
     return addr & 0b0000'0111;
+}
+
+constexpr libusb_endpoint_direction
+ep_addr_to_endpoint_direction(std::uint8_t b_endpoint_address) noexcept
+{
+    return static_cast<libusb_endpoint_direction>((b_endpoint_address >> 7) & 1u);
 }
 
 constexpr libusb_transfer_type

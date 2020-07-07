@@ -22,7 +22,8 @@ print_endpoint_desc(libusb_endpoint_descriptor const* epd)
         attrs.append(to_str(ep_attr_to_iso_usage_type(epd->bmAttributes)));
     }
 
-    fmt::print("              number:            {} ({})\n"
+    fmt::print("              number:            {}\n"
+               "              direction:         {}\n"
                "              attrs:             {}\n"
                "              max packet size:   {}\n"
                "              interval:          {}\n"
@@ -30,8 +31,9 @@ print_endpoint_desc(libusb_endpoint_descriptor const* epd)
                "              sync address:      {}\n"
                "              unknown endpoints: {}\n",
             ep_addr_to_ep_num(epd->bEndpointAddress),
-            ep_addr_to_direction_str(epd->bEndpointAddress), attrs, epd->wMaxPacketSize,
-            epd->bInterval, epd->bRefresh, epd->bSynchAddress, epd->extra_length);
+            to_str(ep_addr_to_endpoint_direction(epd->bEndpointAddress)), attrs,
+            epd->wMaxPacketSize, epd->bInterval, epd->bRefresh, epd->bSynchAddress,
+            epd->extra_length);
 
     return true;
 }
@@ -107,8 +109,8 @@ print_device_desc(libusb_device* dev)
     fmt::print("  bus:                {}\n"
                "  port:               {}\n"
                "  speed:              {}\n",
-               ::libusb_get_bus_number(dev), ::libusb_get_port_number(dev),
-               to_str(static_cast<libusb_speed>(::libusb_get_device_speed(dev))));
+            ::libusb_get_bus_number(dev), ::libusb_get_port_number(dev),
+            to_str(static_cast<libusb_speed>(::libusb_get_device_speed(dev))));
 
     libusb_device_descriptor dd;
     int rv = ::libusb_get_device_descriptor(dev, &dd);
