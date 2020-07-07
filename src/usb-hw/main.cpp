@@ -113,12 +113,7 @@ print_device_desc(libusb_device* dev)
             to_str(static_cast<libusb_speed>(::libusb_get_device_speed(dev))));
 
     libusb_device_descriptor dd;
-    int rv = ::libusb_get_device_descriptor(dev, &dd);
-    if (rv != 0) {
-        fmt::print(stderr, "libusb_get_device_descriptor: failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(rv)));
-        return false;
-    }
+    ::libusb_get_device_descriptor(dev, &dd);
 
     DEBUG_ASSERT(dd.bLength == 18);
     DEBUG_ASSERT(dd.bDescriptorType == LIBUSB_DT_DEVICE);
@@ -142,7 +137,7 @@ print_device_desc(libusb_device* dev)
 
     for (int config_num = 0; config_num < dd.bNumConfigurations; ++config_num) {
         libusb_config_descriptor* cd = nullptr;
-        rv = ::libusb_get_config_descriptor(dev, config_num, &cd);
+        int const rv = ::libusb_get_config_descriptor(dev, config_num, &cd);
         if (rv != 0) {
             fmt::print(stderr, "libusb_get_config_descriptor failure ({})\n",
                     ::libusb_strerror(static_cast<libusb_error>(rv)));
