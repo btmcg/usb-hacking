@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 
 bool
@@ -106,10 +107,21 @@ print_device_desc(libusb_device* dev)
     DEBUG_ASSERT(dev != nullptr);
     bool success = true;
 
+    std::uint8_t ports[7];
+    int const num_ports = ::libusb_get_port_numbers(dev, ports, sizeof(ports)/sizeof(ports[0]));
+    if (num_ports < 0) {
+        fmt::print(stderr, "libusb_get_port_numbers failure ({})\n",
+                ::libusb_strerror(static_cast<libusb_error>(num_ports)));
+    }
+    std::string const ports_str = (num_ports == 0)
+            ? "<none>"
+            : fmt::format("{}", fmt::join(std::begin(ports), std::begin(ports) + num_ports, ","));
+
     fmt::print("  bus:                {}\n"
-               "  port:               {}\n"
+               "  address:            {}\n"
+               "  port(s):            {}\n"
                "  speed:              {}\n",
-            ::libusb_get_bus_number(dev), ::libusb_get_port_number(dev),
+            ::libusb_get_bus_number(dev), ::libusb_get_device_address(dev), ports_str,
             to_str(static_cast<libusb_speed>(::libusb_get_device_speed(dev))));
 
     libusb_device_descriptor dd;
