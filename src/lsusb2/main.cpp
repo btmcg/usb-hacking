@@ -108,7 +108,7 @@ print_device_desc(libusb_device* dev)
     bool success = true;
 
     std::uint8_t ports[7];
-    int const num_ports = ::libusb_get_port_numbers(dev, ports, sizeof(ports)/sizeof(ports[0]));
+    int const num_ports = ::libusb_get_port_numbers(dev, ports, sizeof(ports) / sizeof(ports[0]));
     if (num_ports < 0) {
         fmt::print(stderr, "libusb_get_port_numbers failure ({})\n",
                 ::libusb_strerror(static_cast<libusb_error>(num_ports)));
