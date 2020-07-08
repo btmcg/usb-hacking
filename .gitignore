@@ -20,3 +20,4 @@ test/test-runner
 
 # project executables
 src/lsusb2/lsusb2
+src/led-ctl/led-ctl
