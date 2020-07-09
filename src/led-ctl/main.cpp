@@ -19,10 +19,6 @@ main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    fmt::print("vendor_id={:#06x} ({})\n"
-               "product_id={:#06x} ({})\n",
-            args.vendor_id, args.vendor_id, args.product_id, args.product_id);
-
     libusb_context* ctx = nullptr;
     if (int rv = ::libusb_init(&ctx); rv != 0) {
         fmt::print(stderr, "libusb_init: failure ({})\n",
@@ -30,12 +26,14 @@ main(int argc, char** argv)
         std::exit(EXIT_FAILURE);
     }
 
-    if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
-            rv != 0) {
-        fmt::print(stderr, "libusb_set_option: failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(rv)));
-        ::libusb_exit(ctx);
-        std::exit(EXIT_FAILURE);
+    if (args.debug) {
+        if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+                rv != 0) {
+            fmt::print(stderr, "libusb_set_option: failure ({})\n",
+                    ::libusb_strerror(static_cast<libusb_error>(rv)));
+            ::libusb_exit(ctx);
+            std::exit(EXIT_FAILURE);
+        }
     }
 
     libusb_device_handle* dev_handle

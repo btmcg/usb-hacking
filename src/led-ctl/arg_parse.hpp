@@ -13,6 +13,7 @@ struct cli_args
 {
     int vendor_id = -1;
     int product_id = -1;
+    bool debug = false;
 };
 
 cli_args
@@ -20,13 +21,14 @@ arg_parse(int argc, char** argv)
 {
     auto usage = [](std::FILE* outerr, std::filesystem::path const& app) {
         std::fprintf(outerr,
-                "usage: %s [-hv] <vendor_id>:<product_id>\n"
+                "usage: %s [-Dhv] <vendor_id>:<product_id>\n"
                 "arguments:\n"
-                "   vendor_id               usb vendor id (in hex (e.g. 0x0123)\n"
-                "   product_id               usb device id (in hex (e.g. 0x3210)\n"
+                "   vendor_id               Vendor id of device to connect to (e.g. 0x0123).\n"
+                "   product_id              Product id of device to connect to (e.g. 0x3210).\n"
                 "options:\n"
-                "  -h, --help               this output\n"
-                "  -v, --version            version\n",
+                "  -D, --debug              Enable libusb debugging (to stderr).\n"
+                "  -h, --help               This output.\n"
+                "  -v, --version            Print application version information.\n",
                 app.c_str());
         std::exit(outerr == stdout ? EXIT_SUCCESS : EXIT_FAILURE);
     };
@@ -35,14 +37,17 @@ arg_parse(int argc, char** argv)
 
     cli_args args;
     while (true) {
+        // clang-format off
         static option long_options[] = {
-                {"help", no_argument, nullptr, 'h'},
-                {"version", no_argument, nullptr, 'v'},
-                {nullptr, 0, nullptr, 0},
+                { "debug",      no_argument,    nullptr,    'D' },
+                { "help",       no_argument,    nullptr,    'h' },
+                { "version",    no_argument,    nullptr,    'v' },
+                { nullptr,      0,              nullptr,    0 },
         };
+        // clang-format on
 
         int const c = ::getopt_long(
-                argc, argv, "hv", static_cast<option const*>(long_options), nullptr);
+                argc, argv, "Dhv", static_cast<option const*>(long_options), nullptr);
         if (c == -1)
             break;
 
@@ -55,6 +60,10 @@ arg_parse(int argc, char** argv)
                 std::fprintf(stdout, "app_version=%s\n%s\n", ::VERSION,
                         get_version_info_multiline().c_str());
                 std::exit(EXIT_SUCCESS);
+                break;
+
+            case 'D':
+                args.debug = true;
                 break;
 
             case '?':
@@ -85,5 +94,6 @@ arg_parse(int argc, char** argv)
 
     args.vendor_id = std::stoi(vdid.substr(0, colon), nullptr, 16);
     args.product_id = std::stoi(vdid.substr(colon + 1), nullptr, 16);
+
     return args;
 }
