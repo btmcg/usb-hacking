@@ -52,7 +52,8 @@ main(int argc, char** argv)
     }
 
     if (args.debug) {
-        if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG); rv != 0) {
+        if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+                rv != 0) {
             fmt::print(stderr, "libusb_get_port_numbers failure ({})\n",
                     ::libusb_strerror(static_cast<libusb_error>(rv)));
             ::libusb_exit(ctx);
