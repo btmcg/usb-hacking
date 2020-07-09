@@ -13,6 +13,7 @@ struct cli_args
 {
     int vendor_id = -1;
     int product_id = -1;
+    bool debug = false;
 };
 
 cli_args
@@ -20,12 +21,13 @@ arg_parse(int argc, char** argv)
 {
     auto usage = [](std::FILE* outerr, std::filesystem::path const& app) {
         std::fprintf(outerr,
-                "usage: %s [-hv] [--device=<vendor_id>:<product_id>]\n"
+                "usage: %s [-Dhv] [--device=<vendor_id>:<product_id>]\n"
                 "options:\n"
                 "  -d, --device=<vendor_id>:<product_id>    Show only devices with the specified vendor and \n"
                 "                                           product ID. Both IDs are given in hex (e.g. 0x1234:0xabcd).\n"
-                "  -h, --help                               This output\n"
-                "  -v, --version                            Print application version information\n",
+                "  -D, --debug                              Enable libusb debugging to stderr.\n"
+                "  -h, --help                               This output.\n"
+                "  -v, --version                            Print application version information.\n",
                 app.c_str());
         std::exit(outerr == stdout ? EXIT_SUCCESS : EXIT_FAILURE);
     };
@@ -36,6 +38,7 @@ arg_parse(int argc, char** argv)
     while (true) {
         // clang-format off
         static option const long_options[] = {
+                { "debug",      no_argument,        nullptr,    'D' },
                 { "device",     required_argument,  nullptr,    'd' },
                 { "help",       no_argument,        nullptr,    'h' },
                 { "version",    no_argument,        nullptr,    'v' },
@@ -44,7 +47,7 @@ arg_parse(int argc, char** argv)
         // clang-format on
 
         int const c = ::getopt_long(
-                argc, argv, "hd:v", static_cast<option const*>(long_options), nullptr);
+                argc, argv, "d:Dhv", static_cast<option const*>(long_options), nullptr);
         if (c == -1)
             break;
 
@@ -65,6 +68,10 @@ arg_parse(int argc, char** argv)
                 args.product_id = std::stoi(vidpid.substr(colon + 1), nullptr, 16);
                 break;
             }
+
+            case 'D':
+                args.debug = true;
+                break;
 
             case 'v':
                 std::fprintf(stdout, "app_version=%s\n%s\n", ::VERSION,
