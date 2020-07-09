@@ -44,16 +44,15 @@ main(int argc, char** argv)
 
     libusb_context* ctx = nullptr;
 
-    int rv = ::libusb_init(&ctx);
-    if (rv != 0) {
+    if (int rv = ::libusb_init(&ctx); rv != 0) {
         fmt::print(stderr, "libusb_init: failure ({})\n",
                 ::libusb_strerror(static_cast<libusb_error>(rv)));
         std::exit(EXIT_FAILURE);
     }
 
     if (args.debug) {
-        if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
-                rv != 0) {
+        int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+        if (rv != 0) {
             fmt::print(stderr, "libusb_get_port_numbers failure ({})\n",
                     ::libusb_strerror(static_cast<libusb_error>(rv)));
             ::libusb_exit(ctx);
@@ -134,8 +133,7 @@ print_device_desc(libusb_device* dev)
 
     for (int config_num = 0; config_num < dd.bNumConfigurations; ++config_num) {
         libusb_config_descriptor* cd = nullptr;
-        int const rv = ::libusb_get_config_descriptor(dev, config_num, &cd);
-        if (rv != 0) {
+        if (int rv = ::libusb_get_config_descriptor(dev, config_num, &cd); rv != 0) {
             fmt::print(stderr, "libusb_get_config_descriptor failure ({})\n",
                     ::libusb_strerror(static_cast<libusb_error>(rv)));
             success = false;
