@@ -1,10 +1,12 @@
-#include "core/enums.hpp"
+#include "arg_parse.hpp"
+#include "enums.hpp"
 #include "util/assert.hpp"
 #include <fmt/format.h>
 #include <libusb.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <string>
 
 
@@ -15,26 +17,24 @@ print_endpoint_desc(libusb_endpoint_descriptor const* epd)
     DEBUG_ASSERT(epd->bDescriptorType == LIBUSB_DT_ENDPOINT);
     DEBUG_ASSERT(epd->bLength == 7);
 
-    std::string attrs(to_str(ep_attr_to_transfer_type(epd->bmAttributes)));
-    if (ep_attr_to_transfer_type(epd->bmAttributes) == LIBUSB_TRANSFER_TYPE_ISOCHRONOUS) {
-        attrs.append(",");
-        attrs.append(to_str(ep_attr_to_iso_sync_type(epd->bmAttributes)));
-        attrs.append(",");
-        attrs.append(to_str(ep_attr_to_iso_usage_type(epd->bmAttributes)));
-    }
-
-    fmt::print("              number:            {}\n"
-               "              direction:         {}\n"
+    fmt::print("              address:           {}\n"
+               "                number:            {}\n"
+               "                direction:         {}\n"
                "              attrs:             {}\n"
-               "              max packet size:   {}\n"
+               "                transfer type:     {}\n"
+               "                iso sync type:     {}\n"
+               "                iso usage type:    {}\n"
+               "              max packet size:   {} bytes\n"
                "              interval:          {}\n"
                "              refresh:           {}\n"
                "              sync address:      {}\n"
                "              unknown endpoints: {}\n",
-            ep_addr_to_ep_num(epd->bEndpointAddress),
-            to_str(ep_addr_to_endpoint_direction(epd->bEndpointAddress)), attrs,
-            epd->wMaxPacketSize, epd->bInterval, epd->bRefresh, epd->bSynchAddress,
-            epd->extra_length);
+            epd->bEndpointAddress, ep_addr_to_ep_num(epd->bEndpointAddress),
+            to_str(ep_addr_to_endpoint_direction(epd->bEndpointAddress)), epd->bmAttributes,
+            to_str(ep_attr_to_transfer_type(epd->bmAttributes)),
+            to_str(ep_attr_to_iso_sync_type(epd->bmAttributes)),
+            to_str(ep_attr_to_iso_usage_type(epd->bmAttributes)), epd->wMaxPacketSize,
+            epd->bInterval, epd->bRefresh, epd->bSynchAddress, epd->extra_length);
 
     return true;
 }

@@ -141,7 +141,7 @@ ep_addr_to_ep_num(std::uint8_t addr) noexcept
 constexpr libusb_endpoint_direction
 ep_addr_to_endpoint_direction(std::uint8_t b_endpoint_address) noexcept
 {
-    return static_cast<libusb_endpoint_direction>((b_endpoint_address >> 7) & 1u);
+    return static_cast<libusb_endpoint_direction>(b_endpoint_address & 0b1000'0000);
 }
 
 constexpr libusb_transfer_type
