@@ -40,10 +40,7 @@ main(int argc, char** argv)
         target_pid = args.product_id;
     }
 
-    fmt::print("target vendor:product: {:#06x}:{:#06x}\n", target_vid, target_pid);
-
     libusb_context* ctx = nullptr;
-
     if (int rv = ::libusb_init(&ctx); rv != 0) {
         fmt::print(stderr, "libusb_init: failure ({})\n",
                 ::libusb_strerror(static_cast<libusb_error>(rv)));
@@ -63,20 +60,50 @@ main(int argc, char** argv)
     libusb_device** devices = nullptr;
     ssize_t num_devs = ::libusb_get_device_list(ctx, &devices);
     if (num_devs < 0) {
-        fmt::print(stderr, "libusb_get_device_list: failure ({})\n",
+        fmt::print(stderr, "libusb_get_device_list failure ({})\n",
                 ::libusb_strerror(static_cast<libusb_error>(num_devs)));
-        ::libusb_exit(ctx);
         ::libusb_free_device_list(devices, 1);
+        ::libusb_exit(ctx);
         std::exit(EXIT_FAILURE);
     }
 
-    fmt::print("found {} devices:\n", num_devs);
-    for (ssize_t i = 0; i < num_devs; ++i) {
-        fmt::print("device {}:\n", i);
-        if (!print_device_desc(devices[i])) {
-            ::libusb_exit(ctx);
-            ::libusb_free_device_list(devices, 1);
-            std::exit(EXIT_FAILURE);
+    if (target_vid != 0) {
+        // print only device that matches vendor_id:product_id
+        bool dev_found = false;
+        for (ssize_t i = 0; i < num_devs; ++i) {
+            libusb_device_descriptor dd;
+            if (int rv = ::libusb_get_device_descriptor(devices[i], &dd); rv != 0) {
+                fmt::print(stderr, "libusb_get_device_descriptor failure ({})\n",
+                        ::libusb_strerror(static_cast<libusb_error>(num_devs)));
+                ::libusb_free_device_list(devices, 1);
+                ::libusb_exit(ctx);
+                std::exit(EXIT_FAILURE);
+            }
+
+            if (dd.idVendor == target_vid && dd.idProduct == target_pid) {
+                fmt::print("device {}: {:04x}:{:04x}\n", i, target_vid, target_pid);
+                if (!print_device_desc(devices[i])) {
+                    ::libusb_free_device_list(devices, 1);
+                    ::libusb_exit(ctx);
+                    std::exit(EXIT_FAILURE);
+                }
+                dev_found = true;
+                break;
+            }
+        }
+
+        if (!dev_found)
+            fmt::print("no device {:04x}:{:04x} found\n", target_vid, target_pid);
+
+    } else {
+        // print all devices
+        for (ssize_t i = 0; i < num_devs; ++i) {
+            fmt::print("device {}:\n", i);
+            if (!print_device_desc(devices[i])) {
+                ::libusb_exit(ctx);
+                ::libusb_free_device_list(devices, 1);
+                std::exit(EXIT_FAILURE);
+            }
         }
     }
 
