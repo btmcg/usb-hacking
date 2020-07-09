@@ -10,95 +10,79 @@
 #include <string>
 
 
-bool
-print_endpoint_desc(libusb_endpoint_descriptor const* epd)
+bool print_device_desc(libusb_device*);
+bool print_config_desc(libusb_config_descriptor const*);
+bool print_interface_desc(libusb_interface_descriptor const*);
+bool print_endpoint_desc(libusb_endpoint_descriptor const*);
+
+
+/**********************************************************************/
+
+
+int
+main(int argc, char** argv)
 {
-    DEBUG_ASSERT(epd != nullptr);
-    DEBUG_ASSERT(epd->bDescriptorType == LIBUSB_DT_ENDPOINT);
-    DEBUG_ASSERT(epd->bLength == 7);
+    cli_args const args = arg_parse(argc, argv);
 
-    fmt::print("              address:           {}\n"
-               "                number:            {}\n"
-               "                direction:         {}\n"
-               "              attrs:             {}\n"
-               "                transfer type:     {}\n"
-               "                iso sync type:     {}\n"
-               "                iso usage type:    {}\n"
-               "              max packet size:   {} bytes\n"
-               "              interval:          {} msec\n"
-               "              refresh:           {}\n"
-               "              sync address:      {}\n"
-               "              unknown endpoints: {}\n",
-            epd->bEndpointAddress, ep_addr_to_ep_num(epd->bEndpointAddress),
-            to_str(ep_addr_to_endpoint_direction(epd->bEndpointAddress)), epd->bmAttributes,
-            to_str(ep_attr_to_transfer_type(epd->bmAttributes)),
-            to_str(ep_attr_to_iso_sync_type(epd->bmAttributes)),
-            to_str(ep_attr_to_iso_usage_type(epd->bmAttributes)), epd->wMaxPacketSize,
-            epd->bInterval, epd->bRefresh, epd->bSynchAddress, epd->extra_length);
+    std::uint16_t target_vid = 0;
+    std::uint16_t target_pid = 0;
+    if (args.vendor_id != -1) {
+        if (args.vendor_id < 0 || args.vendor_id > std::numeric_limits<std::uint16_t>::max()) {
+            fmt::print(stderr, "error: invalid vendor id: {:#06x}\n", args.vendor_id);
+            return EXIT_FAILURE;
+        }
+        if (args.product_id < 0 || args.product_id > std::numeric_limits<std::uint16_t>::max()) {
+            fmt::print(stderr, "error: invalid product id: {:#06x}\n", args.product_id);
+            return EXIT_FAILURE;
+        }
 
-    return true;
-}
-
-bool
-print_interface_desc(libusb_interface_descriptor const* ifd)
-{
-    DEBUG_ASSERT(ifd != nullptr);
-    DEBUG_ASSERT(ifd->bDescriptorType == LIBUSB_DT_INTERFACE);
-    DEBUG_ASSERT(ifd->bLength == 9);
-
-    fmt::print("          number:             {}\n"
-               "          alternate setting:  {}\n"
-               "          class:              {}\n"
-               "          sub-class:          {}\n"
-               "          protocol:           {}\n"
-               "          interface index:    {}\n"
-               "          unknown interfaces: {}\n"
-               "          num endpoints:      {}\n",
-            ifd->bInterfaceNumber, ifd->bAlternateSetting,
-            to_str(static_cast<libusb_class_code>(ifd->bInterfaceClass)),
-            to_str(static_cast<libusb_class_code>(ifd->bInterfaceSubClass)),
-            ifd->bInterfaceProtocol, ifd->iInterface, ifd->extra_length, ifd->bNumEndpoints);
-
-    for (int ep_num = 0; ep_num < ifd->bNumEndpoints; ++ep_num) {
-        libusb_endpoint_descriptor const epd = ifd->endpoint[ep_num];
-
-        fmt::print("            endpoint {}:\n", ep_num);
-        if (!print_endpoint_desc(&epd))
-            return false;
+        target_vid = args.vendor_id;
+        target_pid = args.product_id;
     }
 
-    return true;
-}
+    fmt::print("target vendor:product: {:#06x}:{:#06x}\n", target_vid, target_pid);
 
-bool
-print_config_desc(libusb_config_descriptor const* cd)
-{
-    DEBUG_ASSERT(cd != nullptr);
-    DEBUG_ASSERT(cd->bDescriptorType == LIBUSB_DT_CONFIG);
-    DEBUG_ASSERT(cd->bLength == 9);
+    libusb_context* ctx = nullptr;
 
-    fmt::print("      total length:    {}\n"
-               "      config value:    {}\n"
-               "      config:          {}\n"
-               "      attributes:      {}\n"
-               "      max power:       {}\n"
-               "      unknown configs: {}\n"
-               "      num interfaces:  {}\n",
-            cd->wTotalLength, cd->bConfigurationValue, cd->iConfiguration, cd->bmAttributes,
-            cd->MaxPower, cd->extra_length, cd->bNumInterfaces);
+    int rv = ::libusb_init(&ctx);
+    if (rv != 0) {
+        fmt::print(stderr, "libusb_init: failure ({})\n",
+                ::libusb_strerror(static_cast<libusb_error>(rv)));
+        std::exit(EXIT_FAILURE);
+    }
 
-    if (cd->bNumInterfaces > 0) {
-        libusb_interface const* iface = cd->interface;
-
-        for (int iface_num = 0; iface_num < iface->num_altsetting; ++iface_num) {
-            libusb_interface_descriptor const ifd = iface->altsetting[iface_num];
-            fmt::print("        interface {}:\n", iface_num);
-            if (!print_interface_desc(&ifd))
-                return false;
+    if (args.debug) {
+        if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG); rv != 0) {
+            fmt::print(stderr, "libusb_get_port_numbers failure ({})\n",
+                    ::libusb_strerror(static_cast<libusb_error>(rv)));
+            ::libusb_exit(ctx);
+            std::exit(EXIT_FAILURE);
         }
     }
 
-    return true;
+    libusb_device** devices = nullptr;
+    ssize_t num_devs = ::libusb_get_device_list(ctx, &devices);
+    if (num_devs < 0) {
+        fmt::print(stderr, "libusb_get_device_list: failure ({})\n",
+                ::libusb_strerror(static_cast<libusb_error>(num_devs)));
+        ::libusb_exit(ctx);
+        ::libusb_free_device_list(devices, 1);
+        std::exit(EXIT_FAILURE);
+    }
+
+    fmt::print("found {} devices:\n", num_devs);
+    for (ssize_t i = 0; i < num_devs; ++i) {
+        fmt::print("device {}:\n", i);
+        if (!print_device_desc(devices[i])) {
+            ::libusb_exit(ctx);
+            ::libusb_free_device_list(devices, 1);
+            std::exit(EXIT_FAILURE);
+        }
+    }
+
+    ::libusb_free_device_list(devices, 1);
+    ::libusb_exit(ctx);
+    return EXIT_SUCCESS;
 }
 
 bool
@@ -171,67 +155,93 @@ print_device_desc(libusb_device* dev)
     return success;
 }
 
-int
-main(int argc, char** argv)
+bool
+print_config_desc(libusb_config_descriptor const* cd)
 {
-    cli_args const args = arg_parse(argc, argv);
+    DEBUG_ASSERT(cd != nullptr);
+    DEBUG_ASSERT(cd->bDescriptorType == LIBUSB_DT_CONFIG);
+    DEBUG_ASSERT(cd->bLength == 9);
 
-    std::uint16_t target_vid = 0;
-    std::uint16_t target_pid = 0;
-    if (args.vendor_id != -1) {
-        if (args.vendor_id < 0 || args.vendor_id > std::numeric_limits<std::uint16_t>::max()) {
-            fmt::print(stderr, "error: invalid vendor id: {:#06x}\n", args.vendor_id);
-            return EXIT_FAILURE;
-        }
-        if (args.product_id < 0 || args.product_id > std::numeric_limits<std::uint16_t>::max()) {
-            fmt::print(stderr, "error: invalid product id: {:#06x}\n", args.product_id);
-            return EXIT_FAILURE;
-        }
+    fmt::print("      total length:    {}\n"
+               "      config value:    {}\n"
+               "      config:          {}\n"
+               "      attributes:      {}\n"
+               "      max power:       {}\n"
+               "      unknown configs: {}\n"
+               "      num interfaces:  {}\n",
+            cd->wTotalLength, cd->bConfigurationValue, cd->iConfiguration, cd->bmAttributes,
+            cd->MaxPower, cd->extra_length, cd->bNumInterfaces);
 
-        target_vid = args.vendor_id;
-        target_pid = args.product_id;
-    }
+    if (cd->bNumInterfaces > 0) {
+        libusb_interface const* iface = cd->interface;
 
-    fmt::print("target vendor:product: {:#06x}:{:#06x}\n", target_vid, target_pid);
-
-    libusb_context* ctx = nullptr;
-
-    int rv = ::libusb_init(&ctx);
-    if (rv != 0) {
-        fmt::print(stderr, "libusb_init: failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(rv)));
-        std::exit(EXIT_FAILURE);
-    }
-
-    // rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
-    // if (rv != 0) {
-    //     fmt::print(stderr, "libusb_set_option: failure ({})\n",
-    //     ::libusb_strerror(static_cast<libusb_error>(rv)));
-    //     ::libusb_exit(ctx);
-    //     std::exit(EXIT_FAILURE);
-    // }
-
-    libusb_device** devices = nullptr;
-    ssize_t num_devs = ::libusb_get_device_list(ctx, &devices);
-    if (num_devs < 0) {
-        fmt::print(stderr, "libusb_get_device_list: failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(num_devs)));
-        ::libusb_exit(ctx);
-        ::libusb_free_device_list(devices, 1);
-        std::exit(EXIT_FAILURE);
-    }
-
-    fmt::print("found {} devices:\n", num_devs);
-    for (ssize_t i = 0; i < num_devs; ++i) {
-        fmt::print("device {}:\n", i);
-        if (!print_device_desc(devices[i])) {
-            ::libusb_exit(ctx);
-            ::libusb_free_device_list(devices, 1);
-            std::exit(EXIT_FAILURE);
+        for (int iface_num = 0; iface_num < iface->num_altsetting; ++iface_num) {
+            libusb_interface_descriptor const ifd = iface->altsetting[iface_num];
+            fmt::print("        interface {}:\n", iface_num);
+            if (!print_interface_desc(&ifd))
+                return false;
         }
     }
 
-    ::libusb_free_device_list(devices, 1);
-    ::libusb_exit(ctx);
-    return EXIT_SUCCESS;
+    return true;
+}
+
+bool
+print_interface_desc(libusb_interface_descriptor const* ifd)
+{
+    DEBUG_ASSERT(ifd != nullptr);
+    DEBUG_ASSERT(ifd->bDescriptorType == LIBUSB_DT_INTERFACE);
+    DEBUG_ASSERT(ifd->bLength == 9);
+
+    fmt::print("          number:             {}\n"
+               "          alternate setting:  {}\n"
+               "          class:              {}\n"
+               "          sub-class:          {}\n"
+               "          protocol:           {}\n"
+               "          interface index:    {}\n"
+               "          unknown interfaces: {}\n"
+               "          num endpoints:      {}\n",
+            ifd->bInterfaceNumber, ifd->bAlternateSetting,
+            to_str(static_cast<libusb_class_code>(ifd->bInterfaceClass)),
+            to_str(static_cast<libusb_class_code>(ifd->bInterfaceSubClass)),
+            ifd->bInterfaceProtocol, ifd->iInterface, ifd->extra_length, ifd->bNumEndpoints);
+
+    for (int ep_num = 0; ep_num < ifd->bNumEndpoints; ++ep_num) {
+        libusb_endpoint_descriptor const epd = ifd->endpoint[ep_num];
+
+        fmt::print("            endpoint {}:\n", ep_num);
+        if (!print_endpoint_desc(&epd))
+            return false;
+    }
+
+    return true;
+}
+
+bool
+print_endpoint_desc(libusb_endpoint_descriptor const* epd)
+{
+    DEBUG_ASSERT(epd != nullptr);
+    DEBUG_ASSERT(epd->bDescriptorType == LIBUSB_DT_ENDPOINT);
+    DEBUG_ASSERT(epd->bLength == 7);
+
+    fmt::print("              address:           {}\n"
+               "                number:            {}\n"
+               "                direction:         {}\n"
+               "              attrs:             {}\n"
+               "                transfer type:     {}\n"
+               "                iso sync type:     {}\n"
+               "                iso usage type:    {}\n"
+               "              max packet size:   {} bytes\n"
+               "              interval:          {} msec\n"
+               "              refresh:           {}\n"
+               "              sync address:      {}\n"
+               "              unknown endpoints: {}\n",
+            epd->bEndpointAddress, ep_addr_to_ep_num(epd->bEndpointAddress),
+            to_str(ep_addr_to_endpoint_direction(epd->bEndpointAddress)), epd->bmAttributes,
+            to_str(ep_attr_to_transfer_type(epd->bmAttributes)),
+            to_str(ep_attr_to_iso_sync_type(epd->bmAttributes)),
+            to_str(ep_attr_to_iso_usage_type(epd->bmAttributes)), epd->wMaxPacketSize,
+            epd->bInterval, epd->bRefresh, epd->bSynchAddress, epd->extra_length);
+
+    return true;
 }
