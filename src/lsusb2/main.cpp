@@ -25,7 +25,7 @@ print_endpoint_desc(libusb_endpoint_descriptor const* epd)
                "                iso sync type:     {}\n"
                "                iso usage type:    {}\n"
                "              max packet size:   {} bytes\n"
-               "              interval:          {}\n"
+               "              interval:          {} msec\n"
                "              refresh:           {}\n"
                "              sync address:      {}\n"
                "              unknown endpoints: {}\n",
