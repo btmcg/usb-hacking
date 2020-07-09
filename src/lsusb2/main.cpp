@@ -172,8 +172,28 @@ print_device_desc(libusb_device* dev)
 }
 
 int
-main()
+main(int argc, char** argv)
 {
+    cli_args const args = arg_parse(argc, argv);
+
+    std::uint16_t target_vid = 0;
+    std::uint16_t target_pid = 0;
+    if (args.vendor_id != -1) {
+        if (args.vendor_id < 0 || args.vendor_id > std::numeric_limits<std::uint16_t>::max()) {
+            fmt::print(stderr, "error: invalid vendor id: {:#06x}\n", args.vendor_id);
+            return EXIT_FAILURE;
+        }
+        if (args.product_id < 0 || args.product_id > std::numeric_limits<std::uint16_t>::max()) {
+            fmt::print(stderr, "error: invalid product id: {:#06x}\n", args.product_id);
+            return EXIT_FAILURE;
+        }
+
+        target_vid = args.vendor_id;
+        target_pid = args.product_id;
+    }
+
+    fmt::print("target vendor:product: {:#06x}:{:#06x}\n", target_vid, target_pid);
+
     libusb_context* ctx = nullptr;
 
     int rv = ::libusb_init(&ctx);
