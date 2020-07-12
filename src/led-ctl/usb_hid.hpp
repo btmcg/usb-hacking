@@ -34,4 +34,3 @@ namespace usb::hid {
 
     } // namespace v1_11
 } // namespace usb::hid
-

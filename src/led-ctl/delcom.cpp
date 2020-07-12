@@ -119,8 +119,8 @@ namespace delcom {
         packet msg;
         msg.recv.cmd = MajorCommand::ReadFirmware;
 
-        if (int nbytes = ::libusb_control_transfer(
-                    dev_, req_type, req, value, interface_, msg.data, sizeof(msg), ctrl_timeout_msec_);
+        if (int nbytes = ::libusb_control_transfer(dev_, req_type, req, value, interface_, msg.data,
+                    sizeof(msg), ctrl_timeout_msec_);
                 nbytes <= 0) {
             throw std::runtime_error(fmt::format("libusb_control_transfer failure ({})\n",
                     ::libusb_strerror(static_cast<libusb_error>(nbytes))));
