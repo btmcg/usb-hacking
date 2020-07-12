@@ -46,7 +46,6 @@ main(int argc, char** argv)
         ::libusb_exit(ctx);
         std::exit(EXIT_FAILURE);
     }
-    fmt::print("dev={}\n", (void*)dev);
 
     try {
         delcom::vi_hid hid(dev);
