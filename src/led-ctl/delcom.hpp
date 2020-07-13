@@ -45,7 +45,6 @@ namespace delcom {
         Blue  = 0b011,
         None  = 0b111,
         // clang-format on
-
     };
 
     constexpr Color
