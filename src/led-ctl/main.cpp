@@ -49,9 +49,13 @@ main(int argc, char** argv)
 
     try {
         delcom::vi_hid hid(dev);
+
         delcom::firmware_info const info = hid.get_firmware_info();
         fmt::print("firmware: serial_number={},version={},date={}{:02}{:02}\n", info.serial_number,
                 info.version, info.year, info.month, info.day);
+
+        auto const [num_events, overflow] = hid.read_and_reset_event_counter();
+        fmt::print("event_counter: num_events={}, overflow={}\n", num_events, overflow);
 
         hid.flash_led(delcom::Color::Red);
         hid.flash_led(delcom::Color::Green);

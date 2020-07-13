@@ -4,6 +4,8 @@
 #include "usb_hid.hpp"
 #include <cstddef> // std::size_t
 #include <cstdint>
+#include <tuple>
+
 
 struct libusb_device_handle;
 
@@ -51,6 +53,9 @@ namespace delcom {
 
         firmware_info get_firmware_info() const;
         void flash_led(Color) const;
+
+        /// \returns event-counter value and overflow status
+        std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;
 
     private:
         void power_led(Color, std::size_t duration) const;

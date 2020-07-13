@@ -218,5 +218,13 @@ namespace delcom {
         } PACKED;
         static_assert(sizeof(fw_info) == 8);
 
+        /// Structure of event-counter response.
+        struct event_counter_info
+        {
+            std::uint32_t counter_value;
+            std::uint8_t overflow_status; ///< 0xff on overflow, otherwise 0
+        } PACKED;
+        static_assert(sizeof(event_counter_info) == 5);
+
     } // namespace v58
 } // namespace delcom

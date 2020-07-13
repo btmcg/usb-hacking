@@ -71,6 +71,25 @@ namespace delcom {
         }
     }
 
+    std::tuple<std::uint32_t, bool>
+    vi_hid::read_and_reset_event_counter() const
+    {
+        packet msg;
+        msg.recv.cmd = Command::ReadEventCounter;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::GetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        auto info = reinterpret_cast<event_counter_info const*>(msg.data);
+
+        return {info->counter_value, (info->overflow_status == 0xff) ? true : false};
+    }
+
+
     // private
     /**********************************************************************/
 
