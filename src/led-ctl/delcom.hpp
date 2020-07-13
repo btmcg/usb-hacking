@@ -21,15 +21,62 @@ namespace delcom {
         int day = 0;
     };
 
+    struct port_data
+    {
+        bool clock_enabled = false;
+        std::uint8_t port0 = 0;
+        std::uint8_t port1 = 0;
+        std::uint8_t port2 = 0;
+
+        std::string
+        str() const
+        {
+            return fmt::format(
+                    "port0={:#04x} ({:b}), port1={:#04x} ({:b}), port2={:#04x} ({:b}), clock_enabled={}",
+                    port0, port0, port1, port1, port2, port2, clock_enabled);
+        }
+    };
+
     enum class Color : std::uint8_t
     {
         // clang-format off
-        Blue  = 0x03,
-        Red   = 0x05,
-        Green = 0x06,
-        None  = 0x07,
+        Green = 0b110,
+        Red   = 0b101,
+        Blue  = 0b011,
+        None  = 0b111,
         // clang-format on
+
     };
+
+    constexpr Color
+    operator&(Color lhs, Color rhs) noexcept
+    {
+        return static_cast<Color>(static_cast<std::underlying_type_t<Color>>(lhs)
+                & static_cast<std::underlying_type_t<Color>>(rhs));
+    }
+
+    constexpr Color
+    operator&=(Color& lhs, Color rhs) noexcept
+    {
+        lhs = static_cast<Color>(static_cast<std::underlying_type_t<Color>>(lhs)
+                & static_cast<std::underlying_type_t<Color>>(rhs));
+        return lhs;
+    }
+
+    constexpr Color
+    operator|(Color lhs, Color rhs) noexcept
+    {
+        return static_cast<Color>(static_cast<std::underlying_type_t<Color>>(lhs)
+                | static_cast<std::underlying_type_t<Color>>(rhs));
+    }
+
+    constexpr Color
+    operator|=(Color& lhs, Color rhs) noexcept
+    {
+        lhs = static_cast<Color>(static_cast<std::underlying_type_t<Color>>(lhs)
+                | static_cast<std::underlying_type_t<Color>>(rhs));
+        return lhs;
+    }
 
     /// Delcom's visual indicator USB HID
     /// \ref vendor id = 0x0fc5
