@@ -1,74 +1,11 @@
 #include "delcom.hpp"
-#include "usb_hid.hpp"
+#include "delcom_protocol.hpp"
 #include "util/assert.hpp"
-#include "util/compiler.hpp"
 #include <fmt/format.h>
 #include <libusb.h>
 
 
 namespace delcom {
-
-
-    // static_assert(sizeof(command_packet.send) == 8);
-    // static_assert(sizeof(command_packet.recv) == 8);
-
-    // struct command_packet
-    // {
-    //     std::uint8_t major_cmd = 0;
-    //     std::uint8_t minor_cmd = 0;
-    //     std::uint8_t lsb = 0;
-    //     std::uint8_t msb = 0;
-    //     std::uint8_t data[4];
-    // } PACKED;
-
-    struct fw_info
-    {
-        std::uint32_t serial_number = 0;
-        std::uint8_t version = 0;
-        std::uint8_t date = 0;
-        std::uint8_t month = 0;
-        std::uint8_t year = 0;
-
-    } PACKED;
-    static_assert(sizeof(fw_info) == 8);
-
-    enum class MajorCommand : std::uint8_t
-    {
-        // clang-format off
-        ReadFirmware    = 10,
-        ReadPort0and1   = 100,
-        Write           = 101,
-        // clang-format on
-    };
-
-    enum class MinorCommand : std::uint8_t
-    {
-        Port0 = 2,
-    };
-
-    struct send_cmd
-    {
-        MajorCommand major_cmd;
-        MinorCommand minor_cmd;
-        std::uint8_t lsb;
-        std::uint8_t msb;
-    } PACKED;
-
-    struct recv_cmd
-    {
-        MajorCommand cmd;
-    } PACKED;
-
-    union packet
-    {
-        std::uint8_t data[8] = {0};
-        send_cmd send;
-        recv_cmd recv;
-    } PACKED;
-    static_assert(sizeof(packet) == 8);
-
-
-    /**********************************************************************/
 
     vi_hid::vi_hid(libusb_device_handle* handle)
             : dev_(handle)
@@ -108,22 +45,18 @@ namespace delcom {
         //  Bits 0:4 determine recipient, see \ref libusb_request_recipient.
         //  Bits 5:6 determine type, see \ref libusb_request_type.
         //  Bit 7 determines data transfer direction, see \ref libusb_endpoint_direction.
-        std::uint8_t const req_type = (static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS)
+        std::uint8_t const request_type = (static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS)
                 | static_cast<std::uint8_t>(LIBUSB_RECIPIENT_INTERFACE)
                 | static_cast<std::uint8_t>(LIBUSB_ENDPOINT_IN));
-        std::uint8_t const req = static_cast<std::uint8_t>(usb::hid::ClassRequest::GetReport);
-        std::uint8_t const report_type = static_cast<std::uint8_t>(usb::hid::ReportType::Feature);
-        std::uint8_t const report_id = static_cast<std::uint8_t>(MajorCommand::ReadFirmware);
-        std::uint16_t const value = (report_type << 8) | report_id;
 
         packet msg;
-        msg.recv.cmd = MajorCommand::ReadFirmware;
+        msg.recv.cmd = Command::ReadFirmware;
 
-        if (int nbytes = ::libusb_control_transfer(dev_, req_type, req, value, interface_, msg.data,
-                    sizeof(msg), ctrl_timeout_msec_);
-                nbytes <= 0) {
-            throw std::runtime_error(fmt::format("libusb_control_transfer failure ({})\n",
-                    ::libusb_strerror(static_cast<libusb_error>(nbytes))));
+        try {
+            ctrl_transfer(request_type, usb::hid::ClassRequest::GetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
         }
 
         auto fi_ptr = reinterpret_cast<fw_info const*>(msg.data);
@@ -140,30 +73,56 @@ namespace delcom {
     void
     vi_hid::flash_led(Color color) const
     {
+        power_led(color, flash_duration_);
+    }
+
+    void
+    vi_hid::power_led(Color color, std::size_t duration) const
+    {
         // Generate a HID Set_Report Request
 
         // Request type
         //  Bits 0:4 determine recipient, see \ref libusb_request_recipient.
         //  Bits 5:6 determine type, see \ref libusb_request_type.
         //  Bit 7 determines data transfer direction, see \ref libusb_endpoint_direction.
-        std::uint8_t const req_type = (static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS)
+        std::uint8_t const request_type = (static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS)
                 | static_cast<std::uint8_t>(LIBUSB_RECIPIENT_INTERFACE)
                 | static_cast<std::uint8_t>(LIBUSB_ENDPOINT_OUT));
-        std::uint8_t const req = static_cast<std::uint8_t>(usb::hid::ClassRequest::SetReport);
-        std::uint16_t const value = static_cast<std::uint8_t>(usb::hid::ReportType::Feature);
 
         packet msg;
-        msg.send.major_cmd = MajorCommand::Write;
-        msg.send.minor_cmd = MinorCommand::Port0;
+        msg.send.cmd = Command::Write;
+        msg.send.write_cmd = WriteCommand::Port1;
         msg.send.lsb = static_cast<std::uint8_t>(color);
 
-        for (int i = 0; i < flash_duration_; ++i) {
-            if (int rv = ::libusb_control_transfer(dev_, req_type, req, value, interface_, msg.data,
-                        sizeof(msg), ctrl_timeout_msec_);
-                    rv <= LIBUSB_SUCCESS) {
-                throw std::runtime_error(fmt::format("libusb_control_transfer failure ({})\n",
-                        ::libusb_strerror(static_cast<libusb_error>(rv))));
+        try {
+            for (decltype(duration) i = 0; i < duration; ++i) {
+                ctrl_transfer(request_type, usb::hid::ClassRequest::SetReport, msg);
             }
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+    }
+
+    void
+    vi_hid::ctrl_transfer(
+            std::uint8_t request_type, usb::hid::ClassRequest request, packet& rpt) const
+    {
+        // high byte of w_value is always a ReportType
+        //  for sets, we leave the low byte 0
+        //  for gets, we set the low byte to the "cmd"
+        std::uint16_t const w_value
+                = (static_cast<std::uint8_t>(usb::hid::ReportType::Feature) << 8)
+                        | (request == usb::hid::ClassRequest::GetReport)
+                ? rpt.data[0]
+                : 0;
+
+        if (int rv
+                = ::libusb_control_transfer(dev_, request_type, static_cast<std::uint8_t>(request),
+                        w_value, interface_, rpt.data, sizeof(rpt), ctrl_timeout_msec_);
+                rv < 0) {
+            throw std::runtime_error(fmt::format("{}: libusb_control_transfer failure ({})",
+                    __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(rv))));
         }
     }
 

@@ -1,10 +1,11 @@
 #pragma once
 
+#include "delcom_protocol.hpp"
+#include "usb_hid.hpp"
+#include <cstddef> // std::size_t
 #include <cstdint>
 
-
 struct libusb_device_handle;
-
 
 namespace delcom {
 
@@ -28,10 +29,10 @@ namespace delcom {
     };
 
     /// Delcom's visual indicator USB HID
-    /// vendor id = 0x0fc5
-    /// product id = 0xb080
-    /// family type id = 2
-    /// https://www.delcomproducts.com/productdetails.asp?PartNumber=900000
+    /// \ref vendor id = 0x0fc5
+    /// \ref product id = 0xb080
+    /// \ref family type id = 2
+    /// \ref https://www.delcomproducts.com/productdetails.asp?PartNumber=900000
     class vi_hid
     {
     public:
@@ -41,8 +42,8 @@ namespace delcom {
     private:
         libusb_device_handle* dev_ = nullptr;
         std::uint32_t ctrl_timeout_msec_ = 1000;
-        std::uint8_t interface_ = 0;
-        int flash_duration_ = 500;
+        std::uint16_t interface_ = 0;
+        std::size_t flash_duration_ = 500;
 
     public:
         explicit vi_hid(libusb_device_handle*);
@@ -50,6 +51,10 @@ namespace delcom {
 
         firmware_info get_firmware_info() const;
         void flash_led(Color) const;
+
+    private:
+        void power_led(Color, std::size_t duration) const;
+        void ctrl_transfer(std::uint8_t request_type, usb::hid::ClassRequest, packet&) const;
     };
 
 } // namespace delcom
