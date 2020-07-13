@@ -21,10 +21,10 @@ namespace delcom {
     enum class Color : std::uint8_t
     {
         // clang-format off
-        Blue    = 0x03,
-        Red     = 0x05,
-        Green   = 0x06,
-        None    = 0x07,
+        Blue  = 0x03,
+        Red   = 0x05,
+        Green = 0x06,
+        None  = 0x07,
         // clang-format on
     };
 
@@ -41,8 +41,8 @@ namespace delcom {
 
     private:
         libusb_device_handle* dev_ = nullptr;
-        std::uint32_t ctrl_timeout_msec_ = 1000;
         std::uint16_t interface_ = 0;
+        std::uint32_t ctrl_timeout_msec_ = 1000;
         std::size_t flash_duration_ = 500;
 
     public:
@@ -54,7 +54,7 @@ namespace delcom {
 
     private:
         void power_led(Color, std::size_t duration) const;
-        void ctrl_transfer(std::uint8_t request_type, usb::hid::ClassRequest, packet&) const;
+        void ctrl_transfer(usb::hid::ClassRequest, packet&) const;
     };
 
 } // namespace delcom

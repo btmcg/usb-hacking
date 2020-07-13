@@ -39,21 +39,11 @@ namespace delcom {
     firmware_info
     vi_hid::get_firmware_info() const
     {
-        // Generate a HID Get_Report Request
-
-        // Request type
-        //  Bits 0:4 determine recipient, see \ref libusb_request_recipient.
-        //  Bits 5:6 determine type, see \ref libusb_request_type.
-        //  Bit 7 determines data transfer direction, see \ref libusb_endpoint_direction.
-        std::uint8_t const request_type = (static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS)
-                | static_cast<std::uint8_t>(LIBUSB_RECIPIENT_INTERFACE)
-                | static_cast<std::uint8_t>(LIBUSB_ENDPOINT_IN));
-
         packet msg;
         msg.recv.cmd = Command::ReadFirmware;
 
         try {
-            ctrl_transfer(request_type, usb::hid::ClassRequest::GetReport, msg);
+            ctrl_transfer(usb::hid::ClassRequest::GetReport, msg);
         } catch (std::exception const& e) {
             throw std::runtime_error(
                     fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
@@ -73,22 +63,20 @@ namespace delcom {
     void
     vi_hid::flash_led(Color color) const
     {
-        power_led(color, flash_duration_);
+        try {
+            power_led(color, flash_duration_);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: power_led failure ({})", __builtin_FUNCTION(), e.what()));
+        }
     }
+
+    // private
+    /**********************************************************************/
 
     void
     vi_hid::power_led(Color color, std::size_t duration) const
     {
-        // Generate a HID Set_Report Request
-
-        // Request type
-        //  Bits 0:4 determine recipient, see \ref libusb_request_recipient.
-        //  Bits 5:6 determine type, see \ref libusb_request_type.
-        //  Bit 7 determines data transfer direction, see \ref libusb_endpoint_direction.
-        std::uint8_t const request_type = (static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS)
-                | static_cast<std::uint8_t>(LIBUSB_RECIPIENT_INTERFACE)
-                | static_cast<std::uint8_t>(LIBUSB_ENDPOINT_OUT));
-
         packet msg;
         msg.send.cmd = Command::Write;
         msg.send.write_cmd = WriteCommand::Port1;
@@ -96,7 +84,7 @@ namespace delcom {
 
         try {
             for (decltype(duration) i = 0; i < duration; ++i) {
-                ctrl_transfer(request_type, usb::hid::ClassRequest::SetReport, msg);
+                ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
             }
         } catch (std::exception const& e) {
             throw std::runtime_error(
@@ -105,21 +93,33 @@ namespace delcom {
     }
 
     void
-    vi_hid::ctrl_transfer(
-            std::uint8_t request_type, usb::hid::ClassRequest request, packet& rpt) const
+    vi_hid::ctrl_transfer(usb::hid::ClassRequest request, packet& rpt) const
     {
-        // high byte of w_value is always a ReportType
-        //  for sets, we leave the low byte 0
-        //  for gets, we set the low byte to the "cmd"
-        std::uint16_t const w_value
-                = (static_cast<std::uint8_t>(usb::hid::ReportType::Feature) << 8)
-                        | (request == usb::hid::ClassRequest::GetReport)
-                ? rpt.data[0]
-                : 0;
+        // USB HID definition section 7.2 Class-Specific Requests
+        // Request type
+        //  Bits 0:4 determine recipient, see \ref libusb_request_recipient.
+        //  Bits 5:6 determine type, see \ref libusb_request_type.
+        //  Bit 7 determines data transfer direction, see \ref libusb_endpoint_direction.
+        std::uint16_t bm_request_type = static_cast<std::uint8_t>(LIBUSB_RECIPIENT_INTERFACE)
+                | static_cast<std::uint8_t>(LIBUSB_REQUEST_TYPE_CLASS);
 
-        if (int rv
-                = ::libusb_control_transfer(dev_, request_type, static_cast<std::uint8_t>(request),
-                        w_value, interface_, rpt.data, sizeof(rpt), ctrl_timeout_msec_);
+        // high byte of w_value is always the ReportType
+        std::uint16_t w_value = static_cast<std::uint8_t>(usb::hid::ReportType::Feature) << 8;
+
+        if (request == usb::hid::ClassRequest::GetReport) {
+            // Generate a HID Get_Report Request
+            bm_request_type |= static_cast<std::uint8_t>(LIBUSB_ENDPOINT_IN);
+
+            // for gets, we set the low byte of w_value to the "cmd"
+            w_value |= rpt.data[0];
+        } else {
+            // Generate a HID Set_Report Request
+            bm_request_type |= static_cast<std::uint8_t>(LIBUSB_ENDPOINT_OUT);
+        }
+
+        if (int rv = ::libusb_control_transfer(dev_, bm_request_type,
+                    static_cast<std::uint8_t>(request), w_value, interface_, rpt.data, sizeof(rpt),
+                    ctrl_timeout_msec_);
                 rv < 0) {
             throw std::runtime_error(fmt::format("{}: libusb_control_transfer failure ({})",
                     __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(rv))));
