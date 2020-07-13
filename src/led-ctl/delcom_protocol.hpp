@@ -15,12 +15,40 @@ namespace delcom {
         /// WriteCommand.
         enum class Command : std::uint8_t
         {
-            // clang-format off
+            /// Reads the event counter value. This command returns the
+            /// 4 byte event counter value and then resets the counter.
+            /// If the counter overflows, then the over flow status byte
+            /// will be set to 0xFF otherwise it will be 0x0. The event
+            /// counter is returned in the first 4 bytes and the
+            /// overflow byte is in the 5 byte.
             ReadEventCounter = 8,
-            ReadFirmware     = 10,
-            ReadPort0and1    = 100,
-            Write            = 101,
-            // clang-format on
+
+            /// Reads the firmware information.
+            ///     Byte 0-3: Unique Device Serial Number. DWORD Little Endian.
+            ///     Byte 4: Firmware Version.
+            ///     Byte 5: Firmware Date.
+            ///     Byte 6: Firmware Month.
+            ///     Byte 7: Firmware Year.
+            /// It’s always a good idea to test that the firmware is at
+            /// least a minimum version. For example, firmware version
+            /// 20.
+            ReadFirmware = 10,
+
+            /// Read port 0 and port 1. This command will read the
+            /// current port values. The first byte (LSB) will contain
+            /// the current value on port 0 and the second byte (MSB)
+            /// will contain the current value on port 1. The third byte
+            /// returns the clock enable status on port 1. And the
+            /// fourth byte returns the port 2 values. This command is
+            /// useful in reading the internal switch and LED pin
+            /// states.
+            ReadPort0and1 = 100,
+
+            /// Writes an 8-byte packet to the device.
+            Write8Bytes = 101,
+
+            /// Writes a 16-byte packet to the device.
+            Write16Bytes = 102,
         };
 
         /// The write command to send to the VI HID. This is referred to
@@ -126,9 +154,10 @@ namespace delcom {
             /// Enable/Disable Events Counter. This command sets up the
             /// event counter. This command is useful for capturing the
             /// internal switch event on models that have a switch. The
-            /// event counter is a more efficient then just polling the port
-            /// pins for the event. See the USBIOHID datasheet for more
-            /// information. The internal switch is mapped to port 0 pin 0.
+            /// event counter is more efficient than just polling the
+            /// port/pins for the event. See the USBIOHID datasheet for
+            /// more information. The internal switch is mapped to port
+            /// 0 pin 0.
             ToggleEventCounter = 38,
 
             /// Buzzer Control. This command is used to drive a buzzer on
@@ -156,6 +185,7 @@ namespace delcom {
             WriteCommand write_cmd;
             std::uint8_t lsb;
             std::uint8_t msb;
+            std::uint8_t data_hid[4];
         } PACKED;
 
         /// Describes the structure of a command that is sent as a USB

@@ -78,7 +78,7 @@ namespace delcom {
     vi_hid::power_led(Color color, std::size_t duration) const
     {
         packet msg;
-        msg.send.cmd = Command::Write;
+        msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::Port1;
         msg.send.lsb = static_cast<std::uint8_t>(color);
 
