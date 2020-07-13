@@ -9,6 +9,16 @@ namespace delcom {
     // confirmed to work with firmware version 58
     inline namespace v58 {
 
+        // Port and pin mappings for Beacon GRB Indicator
+        // port 0: internal switch
+        // port 1, pin 0: green     0b0001
+        // port 1, pin 1: red       0b0010
+        // port 1, pin 2: blue      0b0100
+        // port 1, pin 3: buzzer    0b1000
+        //
+        // port1 = 0xfe = 0b1111'1110 = first led pin ON
+
+
         /// The command to send to the VI HID. This is referred to as
         /// the "major command" in Delcom documentation. The Write
         /// command should be supplemented with an additional

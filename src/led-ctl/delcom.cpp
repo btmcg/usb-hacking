@@ -37,7 +37,7 @@ namespace delcom {
     }
 
     firmware_info
-    vi_hid::get_firmware_info() const
+    vi_hid::read_firmware_info() const
     {
         packet msg;
         msg.recv.cmd = Command::ReadFirmware;
@@ -58,6 +58,27 @@ namespace delcom {
         info.day = fi_ptr->date;
 
         return info;
+    }
+
+    port_data
+    vi_hid::read_port_data() const
+    {
+        packet msg;
+        msg.recv.cmd = Command::ReadPort0and1;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::GetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        port_data pd;
+        pd.port0 = msg.data[0];
+        pd.port1 = msg.data[1];
+        pd.clock_enabled = (msg.data[2] != 0);
+        pd.port2 = msg.data[3];
+        return pd;
     }
 
     void

@@ -51,7 +51,8 @@ namespace delcom {
         explicit vi_hid(libusb_device_handle*);
         ~vi_hid() noexcept;
 
-        firmware_info get_firmware_info() const;
+        firmware_info read_firmware_info() const;
+        port_data read_port_data() const;
         void flash_led(Color) const;
 
         /// \returns event-counter value and overflow status
