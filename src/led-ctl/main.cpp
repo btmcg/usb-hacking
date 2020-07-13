@@ -48,18 +48,60 @@ main(int argc, char** argv)
     }
 
     try {
-        delcom::vi_hid hid(dev);
+        using delcom::Color;
 
-        delcom::firmware_info const info = hid.get_firmware_info();
+        delcom::vi_hid hid(dev);
+        fmt::print("0)  {}\n", hid.read_port_data().str());
+
+        delcom::firmware_info const info = hid.read_firmware_info();
         fmt::print("firmware: serial_number={},version={},date={}{:02}{:02}\n", info.serial_number,
                 info.version, info.year, info.month, info.day);
 
-        auto const [num_events, overflow] = hid.read_and_reset_event_counter();
-        fmt::print("event_counter: num_events={}, overflow={}\n", num_events, overflow);
+        // auto const [num_events, overflow] = hid.read_and_reset_event_counter();
+        // fmt::print("event_counter: num_events={}, overflow={}\n", num_events, overflow);
 
-        hid.flash_led(delcom::Color::Red);
-        hid.flash_led(delcom::Color::Green);
-        hid.flash_led(delcom::Color::Blue);
+        // hid.disable_clock(delcom::Color::Red);
+        // hid.disable_clock(delcom::Color::Green);
+        // hid.disable_clock(delcom::Color::Blue);
+        // fmt::print("1)  {}\n", hid.read_port_data().str());
+
+        // hid.enable_clock(delcom::Color::Red);
+        // hid.enable_clock(delcom::Color::Green);
+        // hid.enable_clock(delcom::Color::Blue);
+        // fmt::print("1)  {}\n", hid.read_port_data().str());
+
+        // hid.set_pwm(delcom::Color::Red, 0);
+        // hid.set_pwm(delcom::Color::Green, 0);
+        // hid.set_pwm(delcom::Color::Blue, 0);
+        // hid.set_duty_cycle(delcom::Color::Red, 0, 0);
+        // hid.set_duty_cycle(delcom::Color::Green, 0, 0);
+        // hid.set_duty_cycle(delcom::Color::Blue, 0, 0);
+        hid.flash_led(Color::Red & Color::Blue & Color::Green);
+        // hid.flash_led(delcom::Color::Green);
+        // hid.flash_led(delcom::Color::Blue);
+        // fmt::print("2)  {}\n", hid.read_port_data().str());
+
+        // hid.set_pwm(delcom::Color::Red, 50);
+        // hid.set_pwm(delcom::Color::Green, 50);
+        // hid.set_pwm(delcom::Color::Blue, 50);
+        // hid.set_duty_cycle(delcom::Color::Red, 100, 0);
+        // hid.set_duty_cycle(delcom::Color::Green, 100, 0);
+        // hid.set_duty_cycle(delcom::Color::Blue, 100, 0);
+        // hid.flash_led(delcom::Color::Red);
+        // hid.flash_led(delcom::Color::Green);
+        // hid.flash_led(delcom::Color::Blue);
+        // fmt::print("3)  {}\n", hid.read_port_data().str());
+
+        // hid.set_pwm(delcom::Color::Red, 100);
+        // hid.set_pwm(delcom::Color::Green, 100);
+        // hid.set_pwm(delcom::Color::Blue, 100);
+        // hid.set_duty_cycle(delcom::Color::Red, 100, 0);
+        // hid.set_duty_cycle(delcom::Color::Green, 100, 0);
+        // hid.set_duty_cycle(delcom::Color::Blue, 100, 0);
+        // hid.flash_led(delcom::Color::Red);
+        // hid.flash_led(delcom::Color::Green);
+        // hid.flash_led(delcom::Color::Blue);
+        // fmt::print("4)  {}\n", hid.read_port_data().str());
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());
         ::libusb_close(dev);
