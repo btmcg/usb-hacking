@@ -110,6 +110,85 @@ namespace delcom {
         return {info->counter_value, (info->overflow_status == 0xff) ? true : false};
     }
 
+    void
+    vi_hid::set_pwm(Color color, std::uint8_t pct) const
+    {
+        packet msg;
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::SetPWM;
+        msg.send.lsb = static_cast<std::uint8_t>(color);
+        msg.send.msb = pct;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+    }
+
+    void
+    vi_hid::set_duty_cycle(Color color, std::uint8_t duty_on, std::uint8_t duty_off) const
+    {
+        packet msg;
+        msg.send.cmd = Command::Write8Bytes;
+        switch (color) {
+            case Color::Green:
+                msg.send.write_cmd = WriteCommand::SetDutyCyclePort1Pin0;
+                break;
+            case Color::Red:
+                msg.send.write_cmd = WriteCommand::SetDutyCyclePort1Pin1;
+                break;
+            case Color::Blue:
+                msg.send.write_cmd = WriteCommand::SetDutyCyclePort1Pin2;
+                break;
+            case Color::None:
+                break;
+        }
+        msg.send.lsb = duty_on;
+        msg.send.msb = duty_off;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+    }
+
+    void
+    vi_hid::enable_clock(Color color) const
+    {
+        packet msg;
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::ToggleClockGenPort1;
+        msg.send.lsb = 0;
+        msg.send.msb = static_cast<std::uint8_t>(color);
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+    }
+
+    void
+    vi_hid::disable_clock(Color color) const
+    {
+        packet msg;
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::ToggleClockGenPort1;
+        msg.send.lsb = static_cast<std::uint8_t>(color);
+        msg.send.msb = 0;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+    }
 
     // private
     /**********************************************************************/

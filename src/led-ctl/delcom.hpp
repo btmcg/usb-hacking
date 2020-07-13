@@ -2,6 +2,7 @@
 
 #include "delcom_protocol.hpp"
 #include "usb_hid.hpp"
+#include <fmt/format.h>
 #include <cstddef> // std::size_t
 #include <cstdint>
 #include <tuple>
@@ -54,6 +55,12 @@ namespace delcom {
         firmware_info read_firmware_info() const;
         port_data read_port_data() const;
         void flash_led(Color) const;
+
+        /// duty_on/duty_off specify time in msecs
+        void set_duty_cycle(Color, std::uint8_t duty_on, std::uint8_t duty_off) const;
+        void set_pwm(Color, std::uint8_t pct) const;
+        void enable_clock(Color) const;
+        void disable_clock(Color) const;
 
         /// \returns event-counter value and overflow status
         std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;
