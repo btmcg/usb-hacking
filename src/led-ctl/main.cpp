@@ -144,11 +144,13 @@ open_device(libusb_context* const ctx, std::uint16_t vid, std::uint16_t pid)
     }
 
     libusb_device_handle* dev_handle = nullptr;
-    if (int rv = ::libusb_open(dev, &dev_handle); rv != 0) {
-        fmt::print(stderr, "libusb_open failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(rv)));
-        dev = nullptr;
-        dev_handle = nullptr;
+    if (dev != nullptr) {
+        if (int rv = ::libusb_open(dev, &dev_handle); rv != 0) {
+            fmt::print(stderr, "libusb_open failure ({})\n",
+                    ::libusb_strerror(static_cast<libusb_error>(rv)));
+            dev = nullptr;
+            dev_handle = nullptr;
+        }
     }
 
     // decrements all device counts by 1
