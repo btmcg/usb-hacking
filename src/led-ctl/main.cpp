@@ -2,9 +2,11 @@
 #include "delcom.hpp"
 #include <fmt/core.h>
 #include <libusb.h>
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+#include <thread> // std::this_thread
 
 
 libusb_device_handle* open_device(libusb_context* const ctx, std::uint16_t vid, std::uint16_t pid);
@@ -56,9 +58,15 @@ main(int argc, char** argv)
         hid.reset_pins_to_default();
         fmt::print("after reset)    {}\n", hid.read_ports_and_pins().str());
 
-        // using delcom::Color;
-        // hid.flash_led(Color::Blue);
-        // fmt::print("after flash)    {}\n", hid.read_ports_and_pins().str());
+        // hid.event_counter(/*enable=*/false);
+        // fmt::print("after ec)       {}\n", hid.read_ports_and_pins().str());
+
+        while (true) {
+            using delcom::Color;
+            hid.flash_led(Color::Blue);
+            fmt::print("{}\n", hid.read_ports_and_pins().str());
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
 
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());
