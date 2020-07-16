@@ -103,6 +103,9 @@ namespace delcom {
 
         firmware_info read_firmware_info() const;
 
+        // event counter
+        bool event_counter(bool enable) const;
+
         // port access
         bool reset_pins_to_default() const;
         port_data read_ports_and_pins() const;

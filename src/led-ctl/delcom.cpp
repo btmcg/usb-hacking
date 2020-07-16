@@ -77,6 +77,28 @@ namespace delcom {
     }
 
     bool
+    vi_hid::event_counter(bool b) const
+    {
+        packet msg = {0};
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::ToggleEventCounter;
+        if (b)
+            msg.send.lsb = 0xff;
+        else
+            msg.send.msb = 0xff;
+
+        try {
+            print(msg.send);
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
+    }
+
+    bool
     vi_hid::reset_pins_to_default() const
     {
         packet msg = {0};
