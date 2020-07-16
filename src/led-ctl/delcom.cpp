@@ -229,7 +229,7 @@ namespace delcom {
         packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::SetPWM;
-        msg.send.lsb = static_cast<std::uint8_t>(color);
+        msg.send.lsb = ~static_cast<std::uint8_t>(color);
         msg.send.msb = pct;
 
         try {
@@ -255,8 +255,6 @@ namespace delcom {
             case Color::Blue:
                 msg.send.write_cmd = WriteCommand::SetDutyCyclePort1Pin2;
                 break;
-            case Color::None:
-                break;
         }
         msg.send.lsb = duty_on;
         msg.send.msb = duty_off;
@@ -276,7 +274,7 @@ namespace delcom {
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::ToggleClockGenPort1;
         msg.send.lsb = 0;
-        msg.send.msb = static_cast<std::uint8_t>(color);
+        msg.send.msb = ~static_cast<std::uint8_t>(color);
 
         try {
             ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
@@ -292,7 +290,7 @@ namespace delcom {
         packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::ToggleClockGenPort1;
-        msg.send.lsb = static_cast<std::uint8_t>(color);
+        msg.send.lsb = ~static_cast<std::uint8_t>(color);
         msg.send.msb = 0;
 
         try {
@@ -312,9 +310,10 @@ namespace delcom {
         packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::Port1;
-        msg.send.lsb = static_cast<std::uint8_t>(color);
+        msg.send.lsb = ~static_cast<std::uint8_t>(color);
 
         try {
+            print(msg.send);
             for (decltype(duration) i = 0; i < duration; ++i) {
                 ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
             }

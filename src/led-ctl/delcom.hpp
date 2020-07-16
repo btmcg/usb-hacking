@@ -39,10 +39,9 @@ namespace delcom {
     enum class Color : std::uint8_t
     {
         // clang-format off
-        Green = 0b110,
-        Red   = 0b101,
-        Blue  = 0b011,
-        None  = 0b111,
+        Green = 0b001,
+        Red   = 0b010,
+        Blue  = 0b100,
         // clang-format on
     };
 

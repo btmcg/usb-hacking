@@ -63,6 +63,8 @@ main(int argc, char** argv)
 
         while (true) {
             using delcom::Color;
+            hid.flash_led(Color::Green);
+            hid.flash_led(Color::Red);
             hid.flash_led(Color::Blue);
             fmt::print("{}\n", hid.read_ports_and_pins().str());
             std::this_thread::sleep_for(std::chrono::seconds(1));
