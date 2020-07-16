@@ -121,6 +121,12 @@ namespace delcom {
         void enable_clock(Color) const;
         void disable_clock(Color) const;
 
+        /// enables/disables turning off all pins when switch pressed
+        bool auto_clear(bool) const;
+
+        /// enables/disables buzzer sound when switch pressed
+        bool auto_confirm(bool) const;
+
     private:
         void power_led(Color, std::size_t duration) const;
         void ctrl_transfer(usb::hid::ClassRequest, packet&) const;

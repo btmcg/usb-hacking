@@ -341,4 +341,55 @@ namespace delcom {
         }
     }
 
+    bool
+    vi_hid::auto_clear(bool b) const
+    {
+        enum class AutoClear : std::uint8_t
+        {
+            // clang-format off
+            Enable  = 0b0100'0000,
+            Disable = 0b0000'0000,
+            // clang-format on
+        };
+
+        packet msg = {0};
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::AutoClearAutoConfirmCtrl;
+        msg.send.lsb = static_cast<std::uint8_t>(b ? AutoClear::Disable : AutoClear::Enable);
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
+    }
+
+    bool
+    vi_hid::auto_confirm(bool b) const
+    {
+        enum class AutoConfirm : std::uint8_t
+        {
+            // clang-format off
+            Enable  = 0b1000'0000,
+            Disable = 0b0000'0000,
+            // clang-format on
+        };
+
+        packet msg = {0};
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::AutoClearAutoConfirmCtrl;
+        msg.send.lsb = static_cast<std::uint8_t>(b ? AutoConfirm::Disable : AutoConfirm::Enable);
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
+    }
 } // namespace delcom
