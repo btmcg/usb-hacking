@@ -51,7 +51,11 @@ main(int argc, char** argv)
         using delcom::Color;
 
         delcom::vi_hid hid(dev);
-        fmt::print("0)  {}\n", hid.read_port_data().str());
+        fmt::print("startup)        {}\n", hid.read_ports_and_pins().str());
+
+        hid.reset_pins(0, 0xff);
+        hid.reset_pins(1, 0xff);
+        fmt::print("after reset)    {}\n", hid.read_ports_and_pins().str());
 
         delcom::firmware_info const info = hid.read_firmware_info();
         fmt::print("firmware: serial_number={},version={},date={}{:02}{:02}\n", info.serial_number,
@@ -79,7 +83,7 @@ main(int argc, char** argv)
         hid.flash_led(Color::Red & Color::Blue & Color::Green);
         // hid.flash_led(delcom::Color::Green);
         // hid.flash_led(delcom::Color::Blue);
-        // fmt::print("2)  {}\n", hid.read_port_data().str());
+        fmt::print("after flash)    {}\n", hid.read_ports_and_pins().str());
 
         // hid.set_pwm(delcom::Color::Red, 50);
         // hid.set_pwm(delcom::Color::Green, 50);
