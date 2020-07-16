@@ -42,41 +42,32 @@ main(int argc, char** argv)
 
     libusb_device_handle* dev = open_device(ctx, args.vendor_id, args.product_id);
     if (dev == nullptr) {
-        fmt::print(stderr, "device {:04x}:{:04x} not found\n", args.vendor_id, args.product_id);
+        fmt::print(
+                stderr, "failed to open device {:04x}:{:04x}\n", args.vendor_id, args.product_id);
         ::libusb_exit(ctx);
         std::exit(EXIT_FAILURE);
     }
 
+    int exit_code = EXIT_SUCCESS;
     try {
-        using delcom::Color;
-
         delcom::vi_hid hid(dev);
         fmt::print("startup)        {}\n", hid.read_ports_and_pins().str());
 
-        hid.reset_pins(0, 0xff);
-        hid.reset_pins(1, 0xff);
+        hid.reset_pins_to_default();
         fmt::print("after reset)    {}\n", hid.read_ports_and_pins().str());
 
-        delcom::firmware_info const info = hid.read_firmware_info();
-        fmt::print("firmware: serial_number={},version={},date={}{:02}{:02}\n", info.serial_number,
-                info.version, info.year, info.month, info.day);
-
-        // auto const [num_events, overflow] = hid.read_and_reset_event_counter();
-        // fmt::print("event_counter: num_events={}, overflow={}\n", num_events, overflow);
-
-        hid.flash_led(delcom::Color::Blue);
-        fmt::print("after flash)    {}\n", hid.read_ports_and_pins().str());
+        // using delcom::Color;
+        // hid.flash_led(Color::Blue);
+        // fmt::print("after flash)    {}\n", hid.read_ports_and_pins().str());
 
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());
-        ::libusb_close(dev);
-        ::libusb_exit(ctx);
-        std::exit(EXIT_FAILURE);
+        exit_code = EXIT_FAILURE;
     }
 
     ::libusb_close(dev);
     ::libusb_exit(ctx);
-    return EXIT_SUCCESS;
+    return exit_code;
 }
 
 

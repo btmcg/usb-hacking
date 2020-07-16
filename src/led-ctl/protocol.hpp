@@ -282,7 +282,7 @@ namespace delcom {
                 case WriteCommand::ToggleEventCounter:              return "ToggleEventCounter";
                 case WriteCommand::BuzzerCtrl:                      return "BuzzerCtrl";
                 case WriteCommand::AutoClearAutoConfirmCtrl:        return "AutoClearAutoConfirmCtrl";
-                // clang-format on
+                    // clang-format on
             }
             return "<unknown>";
         }

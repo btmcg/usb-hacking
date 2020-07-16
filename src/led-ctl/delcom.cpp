@@ -18,12 +18,7 @@ namespace delcom {
                    "   data_hid1 = {7:#010b} {7:#03d} {7:#04x}\n"
                    "   data_hid2 = {8:#010b} {8:#03d} {8:#04x}\n"
                    "   data_hid3 = {9:#010b} {9:#03d} {9:#04x}\n",
-                msg.cmd,
-                to_str(msg.cmd),
-                msg.write_cmd,
-                to_str(msg.write_cmd),
-                msg.lsb,
-                msg.msb,
+                msg.cmd, to_str(msg.cmd), msg.write_cmd, to_str(msg.write_cmd), msg.lsb, msg.msb,
                 msg.data_hid[0], msg.data_hid[1], msg.data_hid[2], msg.data_hid[3]);
     }
 
