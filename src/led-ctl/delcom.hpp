@@ -76,7 +76,11 @@ namespace delcom {
         return lhs;
     }
 
-    /// Delcom's visual indicator USB HID
+
+    /// Simple API for sending/receiving data to/from Delcom's visual
+    /// indicator USB HID. Relies on libusb for communication. Object
+    /// does *not* take ownership of device handle passed to constructor
+    /// -- user is responsible for freeing/releasing the device handle.
     /// \ref vendor id = 0x0fc5
     /// \ref product id = 0xb080
     /// \ref family type id = 2
