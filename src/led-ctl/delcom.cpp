@@ -1,11 +1,32 @@
 #include "delcom.hpp"
-#include "delcom_protocol.hpp"
 #include "util/assert.hpp"
 #include <fmt/format.h>
 #include <libusb.h>
 
 
 namespace delcom {
+
+    void
+    print(send_cmd const& msg)
+    {
+        fmt::print("send_cmd\n"
+                   "   cmd       = {0:#03d} {1:s}\n"
+                   "   write_cmd = {2:#03d} {3:s}\n"
+                   "   lsb       = {4:#010b} {4:#03d} {4:#04x}\n"
+                   "   msb       = {5:#010b} {5:#03d} {5:#04x}\n"
+                   "   data_hid0 = {6:#010b} {6:#03d} {6:#04x}\n"
+                   "   data_hid1 = {7:#010b} {7:#03d} {7:#04x}\n"
+                   "   data_hid2 = {8:#010b} {8:#03d} {8:#04x}\n"
+                   "   data_hid3 = {9:#010b} {9:#03d} {9:#04x}\n",
+                msg.cmd,
+                to_str(msg.cmd),
+                msg.write_cmd,
+                to_str(msg.write_cmd),
+                msg.lsb,
+                msg.msb,
+                msg.data_hid[0], msg.data_hid[1], msg.data_hid[2], msg.data_hid[3]);
+    }
+
 
     vi_hid::vi_hid(libusb_device_handle* handle)
             : dev_(handle)
@@ -98,6 +119,7 @@ namespace delcom {
         msg.send.lsb = pins;
 
         try {
+            print(msg.send);
             ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
         } catch (std::exception const& e) {
             throw std::runtime_error(
@@ -124,6 +146,7 @@ namespace delcom {
         msg.send.msb = pins;
 
         try {
+            print(msg.send);
             ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
         } catch (std::exception const& e) {
             throw std::runtime_error(

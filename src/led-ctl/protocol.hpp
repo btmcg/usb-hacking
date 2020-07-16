@@ -243,5 +243,49 @@ namespace delcom {
         } PACKED;
         static_assert(sizeof(event_counter_info) == 5);
 
+        constexpr char const*
+        to_str(Command e)
+        {
+            switch (e) {
+                // clang-format off
+                case Command::ReadEventCounter: return "ReadEventCounter";
+                case Command::ReadFirmware:     return "ReadFirmware";
+                case Command::ReadPort0and1:    return "ReadPort0and1";
+                case Command::Write8Bytes:      return "Write8Bytes";
+                case Command::Write16Bytes:     return "Write16Bytes";
+                    // clang-format on
+            }
+            return "<unknown>";
+        }
+
+        constexpr char const*
+        to_str(WriteCommand e)
+        {
+            switch (e) {
+                // clang-format off
+                case WriteCommand::Port0:                           return "Port0";
+                case WriteCommand::Port1:                           return "Port1";
+                case WriteCommand::Port0and1:                       return "Port0and1";
+                case WriteCommand::SetOrResetPort0:                 return "SetOrResetPort0";
+                case WriteCommand::SetOrResetPort1:                 return "SetOrResetPort1";
+                case WriteCommand::SetClockGen:                     return "SetClockGen";
+                case WriteCommand::ToggleClockGenPort1:             return "ToggleClockGenPort1";
+                case WriteCommand::SetDutyCyclePort1Pin0:           return "SetDutyCyclePort1Pin0";
+                case WriteCommand::SetDutyCyclePort1Pin1:           return "SetDutyCyclePort1Pin1";
+                case WriteCommand::SetDutyCyclePort1Pin2:           return "SetDutyCyclePort1Pin2";
+                case WriteCommand::SyncClockGen:                    return "SyncClockGen";
+                case WriteCommand::SetInitialPhaseDelayPort1Pin0:   return "SetInitialPhaseDelayPort1Pin0";
+                case WriteCommand::SetInitialPhaseDelayPort1Pin1:   return "SetInitialPhaseDelayPort1Pin1";
+                case WriteCommand::SetInitialPhaseDelayPort1Pin2:   return "SetInitialPhaseDelayPort1Pin2";
+                case WriteCommand::SetInitialPhaseDelayPort1Pin3:   return "SetInitialPhaseDelayPort1Pin3";
+                case WriteCommand::SetPWM:                          return "SetPWM";
+                case WriteCommand::ToggleEventCounter:              return "ToggleEventCounter";
+                case WriteCommand::BuzzerCtrl:                      return "BuzzerCtrl";
+                case WriteCommand::AutoClearAutoConfirmCtrl:        return "AutoClearAutoConfirmCtrl";
+                // clang-format on
+            }
+            return "<unknown>";
+        }
+
     } // namespace v58
 } // namespace delcom

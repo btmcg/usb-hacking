@@ -1,6 +1,6 @@
 #pragma once
 
-#include "delcom_protocol.hpp"
+#include "protocol.hpp"
 #include "usb_hid.hpp"
 #include <fmt/format.h>
 #include <cstddef> // std::size_t
