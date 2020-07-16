@@ -61,7 +61,7 @@ namespace delcom {
     }
 
     port_data
-    vi_hid::read_port_data() const
+    vi_hid::read_ports_and_pins() const
     {
         packet msg;
         msg.recv.cmd = Command::ReadPort0and1;
@@ -79,6 +79,58 @@ namespace delcom {
         pd.clock_enabled = (msg.data[2] != 0);
         pd.port2 = msg.data[3];
         return pd;
+    }
+
+    bool
+    vi_hid::reset_pins(int port, std::uint8_t pins) const
+    {
+        WriteCommand wcmd;
+        if (port == 0)
+            wcmd = WriteCommand::SetOrResetPort0;
+        else if (port == 1)
+            wcmd = WriteCommand::SetOrResetPort1;
+        else
+            return false;
+
+        packet msg;
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = wcmd;
+        msg.send.lsb = pins;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
+    }
+
+    bool
+    vi_hid::set_pins(int port, std::uint8_t pins) const
+    {
+        WriteCommand wcmd;
+        if (port == 0)
+            wcmd = WriteCommand::SetOrResetPort0;
+        else if (port == 1)
+            wcmd = WriteCommand::SetOrResetPort1;
+        else
+            return false;
+
+        packet msg;
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = wcmd;
+        msg.send.msb = pins;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
     }
 
     void

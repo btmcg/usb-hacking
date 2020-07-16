@@ -102,17 +102,23 @@ namespace delcom {
         ~vi_hid() noexcept;
 
         firmware_info read_firmware_info() const;
-        port_data read_port_data() const;
-        void flash_led(Color) const;
 
-        /// duty_on/duty_off specify time in msecs
-        void set_duty_cycle(Color, std::uint8_t duty_on, std::uint8_t duty_off) const;
-        void set_pwm(Color, std::uint8_t pct) const;
-        void enable_clock(Color) const;
-        void disable_clock(Color) const;
+        // port access
+        port_data read_ports_and_pins() const;
+        bool reset_pins(int port, std::uint8_t pins) const;
+        bool set_pins(int port, std::uint8_t pins) const;
 
         /// \returns event-counter value and overflow status
         std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;
+
+        // lighting
+        void flash_led(Color) const;
+        void set_pwm(Color, std::uint8_t pct) const;
+        void set_duty_cycle(Color, std::uint8_t duty_on_msec, std::uint8_t duty_off_msec) const;
+
+        // clock
+        void enable_clock(Color) const;
+        void disable_clock(Color) const;
 
     private:
         void power_led(Color, std::size_t duration) const;
