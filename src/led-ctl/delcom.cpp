@@ -39,7 +39,7 @@ namespace delcom {
     firmware_info
     vi_hid::read_firmware_info() const
     {
-        packet msg;
+        packet msg = {0};
         msg.recv.cmd = Command::ReadFirmware;
 
         try {
@@ -63,7 +63,7 @@ namespace delcom {
     port_data
     vi_hid::read_ports_and_pins() const
     {
-        packet msg;
+        packet msg = {0};
         msg.recv.cmd = Command::ReadPort0and1;
 
         try {
@@ -76,7 +76,7 @@ namespace delcom {
         port_data pd;
         pd.port0 = msg.data[0];
         pd.port1 = msg.data[1];
-        pd.clock_enabled = (msg.data[2] != 0);
+        pd.clock_enabled = msg.data[2];
         pd.port2 = msg.data[3];
         return pd;
     }
@@ -92,7 +92,7 @@ namespace delcom {
         else
             return false;
 
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = wcmd;
         msg.send.lsb = pins;
@@ -118,7 +118,7 @@ namespace delcom {
         else
             return false;
 
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = wcmd;
         msg.send.msb = pins;
@@ -147,7 +147,7 @@ namespace delcom {
     std::tuple<std::uint32_t, bool>
     vi_hid::read_and_reset_event_counter() const
     {
-        packet msg;
+        packet msg = {0};
         msg.recv.cmd = Command::ReadEventCounter;
 
         try {
@@ -165,7 +165,7 @@ namespace delcom {
     void
     vi_hid::set_pwm(Color color, std::uint8_t pct) const
     {
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::SetPWM;
         msg.send.lsb = static_cast<std::uint8_t>(color);
@@ -182,7 +182,7 @@ namespace delcom {
     void
     vi_hid::set_duty_cycle(Color color, std::uint8_t duty_on, std::uint8_t duty_off) const
     {
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         switch (color) {
             case Color::Green:
@@ -211,7 +211,7 @@ namespace delcom {
     void
     vi_hid::enable_clock(Color color) const
     {
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::ToggleClockGenPort1;
         msg.send.lsb = 0;
@@ -228,7 +228,7 @@ namespace delcom {
     void
     vi_hid::disable_clock(Color color) const
     {
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::ToggleClockGenPort1;
         msg.send.lsb = static_cast<std::uint8_t>(color);
@@ -248,7 +248,7 @@ namespace delcom {
     void
     vi_hid::power_led(Color color, std::size_t duration) const
     {
-        packet msg;
+        packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::Port1;
         msg.send.lsb = static_cast<std::uint8_t>(color);
