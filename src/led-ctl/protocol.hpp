@@ -74,7 +74,7 @@ namespace delcom {
 
             /// Write both the port 0 and port 1 values. The LSB data is
             /// written to port 0 and the MSB to port 1.
-            Port0andPort1 = 10,
+            Port0and1 = 10,
 
             /// Sets or resets the port 0 pins individually. The LSB
             /// resets the corresponding port pin(s) and the MSB sets

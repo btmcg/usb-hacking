@@ -81,6 +81,27 @@ namespace delcom {
         return info;
     }
 
+    bool
+    vi_hid::reset_pins_to_default() const
+    {
+        packet msg = {0};
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::SetOrResetPort0;
+        msg.send.msb = 0xff;
+
+        try {
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+
+            msg.send.write_cmd = WriteCommand::SetOrResetPort1;
+            ctrl_transfer(usb::hid::ClassRequest::SetReport, msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(
+                    fmt::format("{}: ctrl transfer failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
+    }
+
     port_data
     vi_hid::read_ports_and_pins() const
     {
