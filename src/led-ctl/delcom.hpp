@@ -31,9 +31,8 @@ namespace delcom {
         std::string
         str() const
         {
-            return fmt::format(
-                    "port0={:#04x} ({:b}), port1={:#04x} ({:b}), port2={:#04x} ({:b}), clock_enabled={}",
-                    port0, port0, port1, port1, port2, port2, clock_enabled);
+            return fmt::format("port0={:08b}, port1={:08b}, port2={:08b}, clock_enabled={}", port0,
+                    port1, port2, clock_enabled);
         }
     };
 
