@@ -1,6 +1,6 @@
-# LOCAL_MODULE := benchmark-runner
-# LOCAL_CPPFLAGS := -I.
-# LOCAL_LIBRARIES :=
+# MODULE_NAME := benchmark-runner
+# MODULE_CPPFLAGS := -I.
+# MODULE_LIBRARIES :=
 
 # $(call use-fmt)
 # $(call use-google-benchmark)
