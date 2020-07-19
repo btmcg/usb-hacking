@@ -121,7 +121,6 @@ namespace delcom {
         std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;
 
     private:
-        void power_led(Color, std::size_t duration) const;
         bool send_set_report(packet const&) const;
         std::size_t send_get_report(packet&) const;
     };

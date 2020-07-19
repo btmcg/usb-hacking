@@ -54,13 +54,10 @@ namespace delcom {
 
         // set up device by first turning off all leds and setting the
         // PWM to full (100) for each
-
-        bool rv = turn_led_off(Color::Red | Color::Green | Color::Blue);
-        DEBUG_ASSERT(rv);
-
-        // set PWM to 100 for every led
-        rv = set_pwm(Color::Green, 100) && set_pwm(Color::Red, 100) && set_pwm(Color::Blue, 100);
-        DEBUG_ASSERT(rv);
+        turn_led_off(Color::Red | Color::Green | Color::Blue);
+        set_pwm(Color::Green, 100);
+        set_pwm(Color::Red, 100);
+        set_pwm(Color::Blue, 100);
     }
 
     vi_hid::~vi_hid() noexcept

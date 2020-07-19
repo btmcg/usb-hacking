@@ -59,14 +59,9 @@ main(int argc, char** argv)
         fmt::print("{}\n", hid.read_firmware_info().str());
         fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
 
-        bool rv = false;
-
-        rv = hid.turn_led_on(Color::Green);
-        DEBUG_ASSERT(rv);
-        rv = hid.turn_led_on(Color::Red);
-        DEBUG_ASSERT(rv);
-        rv = hid.turn_led_on(Color::Blue);
-        DEBUG_ASSERT(rv);
+        hid.turn_led_on(Color::Green);
+        hid.turn_led_on(Color::Red);
+        hid.turn_led_on(Color::Blue);
 
         fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
     } catch (std::exception const& e) {
