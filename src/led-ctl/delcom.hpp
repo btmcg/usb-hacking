@@ -19,30 +19,37 @@ namespace delcom {
         int year = 0;
         int month = 0;
         int day = 0;
-    };
-
-    struct port_data
-    {
-        bool clock_enabled = false;
-        std::uint8_t port0 = 0;
-        std::uint8_t port1 = 0;
-        std::uint8_t port2 = 0;
 
         std::string
         str() const
         {
-            return fmt::format("port0={:08b}, port1={:08b}, port2={:08b}, clock_enabled={}", port0,
-                    port1, port2, clock_enabled);
+            return fmt::format("serial_number={},version={},date={}{:02}{:02}", serial_number,
+                    version, year, month, day);
+        }
+    };
+
+    struct port_data
+    {
+        std::uint8_t port0 = 0;
+        std::uint8_t port1 = 0;
+        std::uint8_t port2 = 0;
+        std::uint8_t clock_status = 0;
+
+        std::string
+        str() const
+        {
+            return fmt::format("port0={:08b}, port1={:08b}, port2={:08b}, clock_status={:08b}",
+                    port0, port1, port2, clock_status);
         }
     };
 
     enum class Color : std::uint8_t
     {
         // clang-format off
-        Green = 0b001,
-        Red   = 0b010,
-        Blue  = 0b100,
-        // clang-format on
+        Green = 0b001,  // port 1, pin 0
+        Red   = 0b010,  // port 1, pin 1
+        Blue  = 0b100,  // port 1, pin 2
+                      // clang-format on
     };
 
     constexpr Color
@@ -101,37 +108,22 @@ namespace delcom {
         ~vi_hid() noexcept;
 
         firmware_info read_firmware_info() const;
+        bool turn_led_on(Color) const;
+        bool turn_led_off(Color) const;
 
-        // event counter
-        bool event_counter(bool enable) const;
+        // can only set PWM for one color at a time
+        bool set_pwm(Color, std::uint8_t pct) const;
 
         // port access
-        bool reset_pins_to_default() const;
         port_data read_ports_and_pins() const;
-        bool reset_pins(int port, std::uint8_t pins) const;
-        bool set_pins(int port, std::uint8_t pins) const;
 
         /// \returns event-counter value and overflow status
         std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;
 
-        // lighting
-        void flash_led(Color) const;
-        void set_pwm(Color, std::uint8_t pct) const;
-        void set_duty_cycle(Color, std::uint8_t duty_on_msec, std::uint8_t duty_off_msec) const;
-
-        // clock
-        void enable_clock(Color) const;
-        void disable_clock(Color) const;
-
-        /// enables/disables turning off all pins when switch pressed
-        bool auto_clear(bool) const;
-
-        /// enables/disables buzzer sound when switch pressed
-        bool auto_confirm(bool) const;
-
     private:
         void power_led(Color, std::size_t duration) const;
-        void ctrl_transfer(usb::hid::ClassRequest, packet&) const;
+        bool send_set_report(packet const&) const;
+        std::size_t send_get_report(packet&) const;
     };
 
 } // namespace delcom

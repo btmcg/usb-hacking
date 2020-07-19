@@ -1,5 +1,6 @@
 #include "arg_parse.hpp"
 #include "delcom.hpp"
+#include "util/assert.hpp"
 #include <fmt/core.h>
 #include <libusb.h>
 #include <chrono>
@@ -52,24 +53,22 @@ main(int argc, char** argv)
 
     int exit_code = EXIT_SUCCESS;
     try {
+        using delcom::Color;
         delcom::vi_hid hid(dev);
-        fmt::print("startup)        {}\n", hid.read_ports_and_pins().str());
+        fmt::print("---> read firmware info\n");
+        fmt::print("{}\n", hid.read_firmware_info().str());
+        fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
 
-        hid.reset_pins_to_default();
-        fmt::print("after reset)    {}\n", hid.read_ports_and_pins().str());
+        bool rv = false;
 
-        // hid.event_counter(/*enable=*/false);
-        // fmt::print("after ec)       {}\n", hid.read_ports_and_pins().str());
+        rv = hid.turn_led_on(Color::Green);
+        DEBUG_ASSERT(rv);
+        rv = hid.turn_led_on(Color::Red);
+        DEBUG_ASSERT(rv);
+        rv = hid.turn_led_on(Color::Blue);
+        DEBUG_ASSERT(rv);
 
-        while (true) {
-            using delcom::Color;
-            hid.flash_led(Color::Green);
-            hid.flash_led(Color::Red);
-            hid.flash_led(Color::Blue);
-            fmt::print("{}\n", hid.read_ports_and_pins().str());
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-
+        fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());
         exit_code = EXIT_FAILURE;
