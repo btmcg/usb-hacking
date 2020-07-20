@@ -225,6 +225,32 @@ namespace delcom {
         return set_pwm(color, pct);
     }
 
+    bool
+    vi_hid::turn_off_leds_on_button_press(bool enable) const
+    {
+        // nb: documentation is incorrect for this command
+        // setting bit 6 of msb enables AutoClear
+        // setting bit 6 of lsb disables AutoClear
+        // (disabling takes precedence)
+
+        packet msg = {0};
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::AutoClearAutoConfirmCtrl;
+        if (!enable)
+            msg.send.lsb = (1ul << 6);
+        else
+            msg.send.msb = (1ul << 6);
+
+        try {
+            return send_set_report(msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(fmt::format(
+                    "{}: send_set_report failure ({})", __builtin_FUNCTION(), e.what()));
+        }
+
+        return true;
+    }
+
     port_data
     vi_hid::read_port_data() const
     {
@@ -272,8 +298,10 @@ namespace delcom {
     bool
     vi_hid::initialize_device() const
     {
-        // Set up device by first turning off all leds and setting the
-        // PWM to the preferred initial value.
+        // Set up device by
+        //  1) turning off all leds (setting color-pins to 1)
+        //  2) set PWM to the preferred initial value (x > 0)
+        //  3) enabling auto clear
 
         if (!turn_led_off(Color::Red | Color::Green | Color::Blue)) {
             fmt::print(stderr, "{}: turn_led_off failure\n", __builtin_FUNCTION());
@@ -281,6 +309,11 @@ namespace delcom {
         }
 
         if (!set_pwm(Color::Red | Color::Green | Color::Blue, initial_pwm_)) {
+            fmt::print(stderr, "{}: set_pwm failure\n", __builtin_FUNCTION());
+            return false;
+        }
+
+        if (!turn_off_leds_on_button_press(/*enable=*/true)) {
             fmt::print(stderr, "{}: set_pwm failure\n", __builtin_FUNCTION());
             return false;
         }

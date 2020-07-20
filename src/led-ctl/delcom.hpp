@@ -86,9 +86,7 @@ namespace delcom {
 
 
     /// Simple API for sending/receiving data to/from Delcom's visual
-    /// indicator USB HID. Relies on libusb for communication. Object
-    /// does *not* take ownership of device handle passed to constructor
-    /// -- user is responsible for freeing/releasing the device handle.
+    /// indicator USB HID. Relies on libusb for communication.
     /// \ref vendor id = 0x0fc5
     /// \ref product id = 0xb080
     /// \ref family type id = 2
@@ -117,6 +115,8 @@ namespace delcom {
         /// called. Returns immediately, regardless of duration.
         bool turn_led_on(Color color, std::uint64_t duration_msecs = 0);
         bool turn_led_off(Color) const;
+
+        bool turn_off_leds_on_button_press(bool enable) const;
 
         /// Set led intensity, where 0 <= pct <= 100. Note that a pct of
         /// 0 means off.

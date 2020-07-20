@@ -34,19 +34,8 @@ main(int argc, char** argv)
         fmt::print("device state: [{}]\n", hid.read_port_data().str());
 
         hid.turn_led_on(Color::Green);
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        hid.turn_led_off(Color::Green);
 
-        hid.turn_led_on(Color::Red);
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        hid.turn_led_off(Color::Red);
-
-        hid.turn_led_on(Color::Red, 3000);
-
-        hid.turn_led_on(Color::Green);
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-
-        hid.turn_led_off(Color::Green);
+        fmt::print("device state: [{}]\n", hid.read_port_data().str());
 
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());
