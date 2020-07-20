@@ -150,6 +150,18 @@ namespace delcom {
         ::libusb_exit(ctx_);
     }
 
+    std::uint16_t
+    vi_hid::vendor_id() const noexcept
+    {
+        return vendor_id_;
+    }
+
+    std::uint16_t
+    vi_hid::product_id() const noexcept
+    {
+        return product_id_;
+    }
+
     firmware_info
     vi_hid::read_firmware_info() const
     {

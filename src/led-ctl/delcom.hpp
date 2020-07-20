@@ -109,11 +109,8 @@ namespace delcom {
         vi_hid(std::uint16_t vendor_id, std::uint16_t product_id, bool debug = false);
         ~vi_hid() noexcept;
 
-        // clang-format off
-        std::uint16_t vendor_id() const noexcept { return vendor_id_; }
-        std::uint16_t product_id() const noexcept { return product_id_; }
-        // clang-format on
-
+        std::uint16_t vendor_id() const noexcept;
+        std::uint16_t product_id() const noexcept;
         firmware_info read_firmware_info() const;
 
         /// A duration of 0 turns the light on until \c turn_led_off is
