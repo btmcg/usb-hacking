@@ -45,9 +45,9 @@ distclean: clean
 		$(RM) $(BIN_DIR)/* && $(RMDIR) $(BIN_DIR))
 
 format:
-	@find src -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec $(FORMAT) {} \;
-	@find test -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec $(FORMAT) {} \;
-	@find benchmark -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec $(FORMAT) {} \;
+	@[ -d src ] && find src -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec $(FORMAT) {} \;
+	@[ -d test ] && find test -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec $(FORMAT) {} \;
+	@[ -d benchmark ] && find benchmark -type f \( -name '*.hpp' -o -name '*.cpp' \) -exec $(FORMAT) {} \;
 
 tags:
 	ctags --recurse src
@@ -58,7 +58,6 @@ benchmark: benchmark-runner
 test: test-runner
 	./bin/$^
 
-# automatically sets COMPILER=clang
 tidy:
 	$(run-clang-tidy)
 
