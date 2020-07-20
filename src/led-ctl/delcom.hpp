@@ -42,14 +42,14 @@ namespace delcom {
         }
     };
 
+    // clang-format off
     enum class Color : std::uint8_t
     {
-        // clang-format off
         Green = 0b001,  // port 1, pin 0
         Red   = 0b010,  // port 1, pin 1
         Blue  = 0b100,  // port 1, pin 2
-                      // clang-format on
     };
+    // clang-format on
 
     constexpr Color
     operator&(Color lhs, Color rhs) noexcept
@@ -124,7 +124,7 @@ namespace delcom {
 
     private:
         bool initialize_device() const;
-        bool set_pwm(Color, std::uint8_t pct) const;
+        bool set_pwm(Color, std::uint8_t) const;
         std::size_t send_get_report(packet&) const;
         bool send_set_report(packet const&) const;
     };

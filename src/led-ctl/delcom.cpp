@@ -99,21 +99,24 @@ namespace delcom {
                     __builtin_FUNCTION(), vendor_id_, product_id_));
         }
 
-        if (::libusb_kernel_driver_active(dev_, interface_) == 1) {
-            if (int e = ::libusb_detach_kernel_driver(dev_, interface_); e != LIBUSB_SUCCESS) {
-                ::libusb_close(dev_);
-                ::libusb_exit(ctx_);
-                throw std::runtime_error(fmt::format("{}: libusb_detach_kernel_driver failure ({})",
-                        __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
-            }
-        }
-
-        // if (int e = ::libusb_set_auto_detach_kernel_driver(dev_, /*enable=*/1);
-        //         e != LIBUSB_SUCCESS) {
-        //     throw std::runtime_error(
-        //             fmt::format("libusb: set_auto_detach_kernel_driver failure ({})",
-        //                     ::libusb_strerror(static_cast<libusb_error>(e))));
+        // if (::libusb_kernel_driver_active(dev_, interface_) == 1) {
+        //     if (int e = ::libusb_detach_kernel_driver(dev_, interface_); e != LIBUSB_SUCCESS) {
+        //         ::libusb_close(dev_);
+        //         ::libusb_exit(ctx_);
+        //         throw std::runtime_error(fmt::format("{}: libusb_detach_kernel_driver failure
+        //         ({})",
+        //                 __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
+        //     }
         // }
+
+        if (int e = ::libusb_set_auto_detach_kernel_driver(dev_, /*enable=*/1);
+                e != LIBUSB_SUCCESS) {
+            ::libusb_close(dev_);
+            ::libusb_exit(ctx_);
+            throw std::runtime_error(
+                    fmt::format("{}: libusb_set_auto_detach_kernel_driver failure ({})",
+                            __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
+        }
 
         if (int e = ::libusb_claim_interface(dev_, interface_); e != LIBUSB_SUCCESS) {
             ::libusb_close(dev_);
