@@ -133,6 +133,19 @@ namespace delcom {
         }
     }
 
+    bool
+    vi_hid::set_led_intensity(Color color, std::uint8_t pct) const
+    {
+        // 'pct' must be 0 <= pct <= 100
+        if (pct > 100) {
+            fmt::print(stderr, "{}: invalid pct ({}) provided; constraints are 0 <= pct <= 100\n",
+                    __builtin_FUNCTION(), pct);
+            return false;
+        }
+
+        return set_pwm(color, pct);
+    }
+
     port_data
     vi_hid::read_ports_and_pins() const
     {
@@ -173,20 +186,37 @@ namespace delcom {
         return {info->counter_value, (info->overflow_status == 0xff) ? true : false};
     }
 
-    bool
-    vi_hid::set_pwm(Color color, std::uint8_t pct) const
-    {
-        // The SetPWM command takes an integer value that refers to an
-        // LED pin (0, 1, 2) on port 1. So we need to send one msg for
-        // each pin that we want to adjust.
 
-        // 'pct' must be 0 <= pct <= 100
-        if (pct > 100) {
-            fmt::print(stderr, "{}: invalid pct ({}) provided; constraints are 0 <= pct <= 100\n",
-                    __builtin_FUNCTION(), pct);
+    // private
+    /**********************************************************************/
+
+    bool
+    vi_hid::initialize_device() const
+    {
+        // Set up device by first turning off all leds and setting the
+        // PWM to full (100) for each.
+
+        if (!turn_led_off(Color::Red | Color::Green | Color::Blue)) {
+            fmt::print(stderr, "{}: turn_led_off failure\n", __builtin_FUNCTION());
             return false;
         }
 
+        if (!set_pwm(Color::Red | Color::Green | Color::Blue, initial_pwm_)) {
+            fmt::print(stderr, "{}: set_pwm failure\n", __builtin_FUNCTION());
+            return false;
+        }
+
+        return true;
+    }
+
+    bool
+    vi_hid::set_pwm(Color color, std::uint8_t pct) const
+    {
+        // The SetPWM command sets the pulse-width modulation for a
+        // particular LED pin. The command takes two integers: a decimal
+        // value that refers to an LED pin (0, 1, 2), and a percentage
+        // value from 0 to 100. Since each command accepts a single pin
+        // to be changed, we need to send one message per pin/color.
         packet msg = {0};
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::SetPWM;
@@ -225,28 +255,6 @@ namespace delcom {
         }
 
         return p0 && p1 && p2;
-    }
-
-    // private
-    /**********************************************************************/
-
-    bool
-    vi_hid::initialize_device() const
-    {
-        // Set up device by first turning off all leds and setting the
-        // PWM to full (100) for each.
-
-        if (!turn_led_off(Color::Red | Color::Green | Color::Blue)) {
-            fmt::print(stderr, "{}: turn_led_off failure\n", __builtin_FUNCTION());
-            return false;
-        }
-
-        if (!set_pwm(Color::Red | Color::Green | Color::Blue, initial_pwm_)) {
-            fmt::print(stderr, "{}: set_pwm failure\n", __builtin_FUNCTION());
-            return false;
-        }
-
-        return true;
     }
 
     std::size_t

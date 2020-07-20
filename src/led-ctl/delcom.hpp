@@ -100,7 +100,7 @@ namespace delcom {
     private:
         libusb_device_handle* dev_ = nullptr;
         std::uint16_t interface_ = 0;
-        std::size_t initial_pwm_ = 100; ///< full (100%)
+        std::size_t initial_pwm_ = 50; ///< half (50%)
 
     public:
         explicit vi_hid(libusb_device_handle*);
@@ -110,9 +110,9 @@ namespace delcom {
         bool turn_led_on(Color) const;
         bool turn_led_off(Color) const;
 
-        /// Set pulse-width modulation for an LED pin.
-        /// pct percentage from 0 to 100
-        bool set_pwm(Color, std::uint8_t pct) const;
+        /// Set led intensity, where 0 <= pct <= 100. Note that a pct of
+        /// 0 means off.
+        bool set_led_intensity(Color, std::uint8_t pct) const;
 
         port_data read_ports_and_pins() const;
 
@@ -121,6 +121,7 @@ namespace delcom {
 
     private:
         bool initialize_device() const;
+        bool set_pwm(Color, std::uint8_t pct) const;
         std::size_t send_get_report(packet&) const;
         bool send_set_report(packet const&) const;
     };
