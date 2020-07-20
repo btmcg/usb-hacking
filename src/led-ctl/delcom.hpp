@@ -110,10 +110,10 @@ namespace delcom {
         bool turn_led_on(Color) const;
         bool turn_led_off(Color) const;
 
-        // can only set PWM for one color at a time
+        /// Set pulse-width modulation for an LED pin.
+        /// pct percentage from 0 to 100
         bool set_pwm(Color, std::uint8_t pct) const;
 
-        // port access
         port_data read_ports_and_pins() const;
 
         /// \returns event-counter value and overflow status
