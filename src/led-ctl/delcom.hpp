@@ -117,7 +117,7 @@ namespace delcom {
         /// 0 means off.
         bool set_led_intensity(Color, std::uint8_t pct) const;
 
-        port_data read_pins() const;
+        port_data read_port_data() const;
 
         /// \returns event-counter value and overflow status
         std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;

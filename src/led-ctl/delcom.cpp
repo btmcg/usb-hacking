@@ -222,7 +222,7 @@ namespace delcom {
     }
 
     port_data
-    vi_hid::read_pins() const
+    vi_hid::read_port_data() const
     {
         packet msg = {0};
         msg.recv.cmd = Command::ReadPort0and1;

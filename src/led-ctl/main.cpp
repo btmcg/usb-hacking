@@ -30,7 +30,7 @@ main(int argc, char** argv)
         delcom::vi_hid hid(args.vendor_id, args.product_id, args.debug);
         fmt::print("connected to device {:#06x}:{:#06x} ({})\n", hid.vendor_id(), hid.product_id(),
                 hid.read_firmware_info().str());
-        fmt::print("device state: [{}]\n", hid.read_pins().str());
+        fmt::print("device state: [{}]\n", hid.read_port_data().str());
 
         hid.turn_led_on(Color::Green);
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
