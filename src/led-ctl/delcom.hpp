@@ -3,12 +3,11 @@
 #include "protocol.hpp"
 #include "usb_hid.hpp"
 #include <fmt/format.h>
+#include <libusb.h>
 #include <cstddef> // std::size_t
 #include <cstdint>
 #include <tuple>
 
-
-struct libusb_device_handle;
 
 namespace delcom {
 
@@ -93,18 +92,22 @@ namespace delcom {
     /// \ref https://www.delcomproducts.com/productdetails.asp?PartNumber=900000
     class vi_hid
     {
-    public:
-        static constexpr std::uint16_t vendor_id = 0x0fc5;
-        static constexpr std::uint16_t product_id = 0xb080;
-
     private:
+        libusb_context* ctx_ = nullptr;
         libusb_device_handle* dev_ = nullptr;
+        std::uint16_t vendor_id_ = 0;
+        std::uint16_t product_id_ = 0;
         std::uint16_t interface_ = 0;
         std::size_t initial_pwm_ = 50; ///< half (50%)
 
     public:
-        explicit vi_hid(libusb_device_handle*);
+        vi_hid(std::uint16_t vendor_id, std::uint16_t product_id, bool debug = false);
         ~vi_hid() noexcept;
+
+        // clang-format off
+        std::uint16_t vendor_id() const noexcept { return vendor_id_; }
+        std::uint16_t product_id() const noexcept { return product_id_; }
+        // clang-format on
 
         firmware_info read_firmware_info() const;
         bool turn_led_on(Color) const;

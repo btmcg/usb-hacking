@@ -10,9 +10,6 @@
 #include <thread> // std::this_thread
 
 
-libusb_device_handle* open_device(libusb_context* const ctx, std::uint16_t vid, std::uint16_t pid);
-
-
 int
 main(int argc, char** argv)
 {
@@ -26,37 +23,12 @@ main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    libusb_context* ctx = nullptr;
-    if (int rv = ::libusb_init(&ctx); rv != 0) {
-        fmt::print(stderr, "libusb_init failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(rv)));
-        std::exit(EXIT_FAILURE);
-    }
-
-    if (args.debug) {
-        if (int rv = ::libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
-                rv != 0) {
-            fmt::print(stderr, "libusb_set_option failure ({})\n",
-                    ::libusb_strerror(static_cast<libusb_error>(rv)));
-            ::libusb_exit(ctx);
-            std::exit(EXIT_FAILURE);
-        }
-    }
-
-    libusb_device_handle* dev = open_device(ctx, args.vendor_id, args.product_id);
-    if (dev == nullptr) {
-        fmt::print(
-                stderr, "failed to open device {:04x}:{:04x}\n", args.vendor_id, args.product_id);
-        ::libusb_exit(ctx);
-        std::exit(EXIT_FAILURE);
-    }
-
     int exit_code = EXIT_SUCCESS;
     try {
         using delcom::Color;
-        delcom::vi_hid hid(dev);
-        fmt::print("connected to device {:#06x}:{:#06x} ({})\n", delcom::vi_hid::vendor_id,
-                delcom::vi_hid::product_id, hid.read_firmware_info().str());
+        delcom::vi_hid hid(args.vendor_id, args.product_id, args.debug);
+        fmt::print("connected to device {:#06x}:{:#06x} ({})\n", hid.vendor_id(), hid.product_id(),
+                hid.read_firmware_info().str());
         fmt::print("device state: [{}]\n", hid.read_ports_and_pins().str());
 
         hid.turn_led_on(Color::Green);
@@ -82,51 +54,5 @@ main(int argc, char** argv)
         exit_code = EXIT_FAILURE;
     }
 
-    ::libusb_close(dev);
-    ::libusb_exit(ctx);
     return exit_code;
-}
-
-
-libusb_device_handle*
-open_device(libusb_context* const ctx, std::uint16_t vid, std::uint16_t pid)
-{
-    libusb_device** devices = nullptr;
-    ssize_t num_devs = ::libusb_get_device_list(ctx, &devices);
-    if (num_devs < 0) {
-        fmt::print(stderr, "libusb_get_device_list failure ({})\n",
-                ::libusb_strerror(static_cast<libusb_error>(num_devs)));
-        ::libusb_free_device_list(devices, 1);
-        return nullptr;
-    }
-
-    libusb_device* dev = nullptr;
-    for (ssize_t i = 0; i < num_devs; ++i) {
-        libusb_device_descriptor dd;
-        if (int rv = ::libusb_get_device_descriptor(devices[i], &dd); rv != 0) {
-            fmt::print(stderr, "libusb_get_device_descriptor failure ({})\n",
-                    ::libusb_strerror(static_cast<libusb_error>(num_devs)));
-            ::libusb_free_device_list(devices, 1);
-            return nullptr;
-        }
-
-        if (dd.idVendor == vid && dd.idProduct == pid) {
-            dev = devices[i];
-            break;
-        }
-    }
-
-    libusb_device_handle* dev_handle = nullptr;
-    if (dev != nullptr) {
-        if (int rv = ::libusb_open(dev, &dev_handle); rv != 0) {
-            fmt::print(stderr, "libusb_open failure ({})\n",
-                    ::libusb_strerror(static_cast<libusb_error>(rv)));
-            dev = nullptr;
-            dev_handle = nullptr;
-        }
-    }
-
-    // decrements all device counts by 1
-    ::libusb_free_device_list(devices, 1);
-    return dev_handle;
 }

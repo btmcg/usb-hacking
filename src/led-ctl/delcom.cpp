@@ -1,10 +1,57 @@
 #include "delcom.hpp"
 #include "util/assert.hpp"
 #include <fmt/format.h>
-#include <libusb.h>
 
 
 namespace delcom {
+
+    namespace { // unnamed
+
+        libusb_device_handle*
+        open_device(libusb_context* const ctx, std::uint16_t vid, std::uint16_t pid)
+        {
+            libusb_device** devices = nullptr;
+            ssize_t num_devs = ::libusb_get_device_list(ctx, &devices);
+            if (num_devs < 0) {
+                fmt::print(stderr, "libusb_get_device_list failure ({})\n",
+                        ::libusb_strerror(static_cast<libusb_error>(num_devs)));
+                ::libusb_free_device_list(devices, 1);
+                return nullptr;
+            }
+
+            libusb_device* dev = nullptr;
+            for (ssize_t i = 0; i < num_devs; ++i) {
+                libusb_device_descriptor dd;
+                if (int rv = ::libusb_get_device_descriptor(devices[i], &dd); rv != 0) {
+                    fmt::print(stderr, "libusb_get_device_descriptor failure ({})\n",
+                            ::libusb_strerror(static_cast<libusb_error>(num_devs)));
+                    ::libusb_free_device_list(devices, 1);
+                    return nullptr;
+                }
+
+                if (dd.idVendor == vid && dd.idProduct == pid) {
+                    dev = devices[i];
+                    break;
+                }
+            }
+
+            libusb_device_handle* dev_handle = nullptr;
+            if (dev != nullptr) {
+                if (int rv = ::libusb_open(dev, &dev_handle); rv != 0) {
+                    fmt::print(stderr, "libusb_open failure ({})\n",
+                            ::libusb_strerror(static_cast<libusb_error>(rv)));
+                    dev = nullptr;
+                    dev_handle = nullptr;
+                }
+            }
+
+            // decrements all device counts by 1
+            ::libusb_free_device_list(devices, 1);
+            return dev_handle;
+        }
+
+    } // namespace
+
 
     std::string
     to_str(send_cmd const& msg)
@@ -28,13 +75,34 @@ namespace delcom {
                 "    major_cmd  = {0:#010b} {0:#03d} {0:#04x} {1:s}", msg.cmd, to_str(msg.cmd));
     }
 
-    vi_hid::vi_hid(libusb_device_handle* handle)
-            : dev_(handle)
+    vi_hid::vi_hid(std::uint16_t vid, std::uint16_t pid, bool debug)
+            : vendor_id_(vid)
+            , product_id_(pid)
     {
-        DEBUG_ASSERT(dev_ != nullptr);
+        if (int e = ::libusb_init(&ctx_); e != LIBUSB_SUCCESS) {
+            throw std::runtime_error(fmt::format("{}: libusb_init failure ({})",
+                    __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
+        }
+
+        if (debug) {
+            if (int e = ::libusb_set_option(ctx_, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+                    e != LIBUSB_SUCCESS) {
+                ::libusb_exit(ctx_);
+                throw std::runtime_error(fmt::format("{}: libusb_set_option failure ({})",
+                        __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
+            }
+        }
+
+        if (dev_ = open_device(ctx_, vendor_id_, product_id_); dev_ == nullptr) {
+            ::libusb_exit(ctx_);
+            throw std::runtime_error(fmt::format("{}: failed to open device {:#06x}:{:#06x}",
+                    __builtin_FUNCTION(), vendor_id_, product_id_));
+        }
 
         if (::libusb_kernel_driver_active(dev_, interface_) == 1) {
             if (int e = ::libusb_detach_kernel_driver(dev_, interface_); e != LIBUSB_SUCCESS) {
+                ::libusb_close(dev_);
+                ::libusb_exit(ctx_);
                 throw std::runtime_error(fmt::format("{}: libusb_detach_kernel_driver failure ({})",
                         __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
             }
@@ -48,25 +116,29 @@ namespace delcom {
         // }
 
         if (int e = ::libusb_claim_interface(dev_, interface_); e != LIBUSB_SUCCESS) {
+            ::libusb_close(dev_);
+            ::libusb_exit(ctx_);
             throw std::runtime_error(fmt::format("{}: libusb_claim_interface failure ({})",
                     __builtin_FUNCTION(), ::libusb_strerror(static_cast<libusb_error>(e))));
         }
 
         if (!initialize_device()) {
+            ::libusb_close(dev_);
+            ::libusb_exit(ctx_);
             throw std::runtime_error(
                     fmt::format("{}: failed to initialized device", __builtin_FUNCTION()));
         }
-    }
+    } // namespace delcom
 
     vi_hid::~vi_hid() noexcept
     {
-        if (dev_ == nullptr)
-            return;
-
         if (int e = ::libusb_release_interface(dev_, interface_); e != LIBUSB_SUCCESS) {
             std::fprintf(stderr, "libusb: release_interface failure (%s)\n",
                     ::libusb_strerror(static_cast<libusb_error>(e)));
         }
+
+        ::libusb_close(dev_);
+        ::libusb_exit(ctx_);
     }
 
     firmware_info
