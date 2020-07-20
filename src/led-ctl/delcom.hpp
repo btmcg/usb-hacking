@@ -100,8 +100,7 @@ namespace delcom {
     private:
         libusb_device_handle* dev_ = nullptr;
         std::uint16_t interface_ = 0;
-        std::uint32_t ctrl_timeout_msec_ = 1000;
-        std::size_t flash_duration_ = 500;
+        std::size_t initial_pwm_ = 100; ///< full (100%)
 
     public:
         explicit vi_hid(libusb_device_handle*);
@@ -121,8 +120,9 @@ namespace delcom {
         std::tuple<std::uint32_t, bool> read_and_reset_event_counter() const;
 
     private:
-        bool send_set_report(packet const&) const;
+        bool initialize_device() const;
         std::size_t send_get_report(packet&) const;
+        bool send_set_report(packet const&) const;
     };
 
 } // namespace delcom

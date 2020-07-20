@@ -55,7 +55,6 @@ main(int argc, char** argv)
     try {
         using delcom::Color;
         delcom::vi_hid hid(dev);
-        fmt::print("---> read firmware info\n");
         fmt::print("{}\n", hid.read_firmware_info().str());
         fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
 
