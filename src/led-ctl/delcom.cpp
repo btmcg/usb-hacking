@@ -195,23 +195,29 @@ namespace delcom {
 
         bool p0 = true, p1 = true, p2 = true;
         try {
-            if (static_cast<std::uint8_t>(color & Color::Green) == 1u) {
+            if ((color & Color::Green) == Color::Green) {
                 msg.send.lsb = 0;
                 p0 = send_set_report(msg);
-                if (!p0)
-                    fmt::print(stderr, "send_set_report failure: failed to set PWM for pin 0\n");
+                if (!p0) {
+                    fmt::print(stderr, "{}: send_set_report failure: failed to set PWM for pin 0\n",
+                            __builtin_FUNCTION());
+                }
             }
-            if (static_cast<std::uint8_t>(color & Color::Red) == 1u) {
+            if ((color & Color::Red) == Color::Red) {
                 msg.send.lsb = 1;
                 p1 = send_set_report(msg);
-                if (!p1)
-                    fmt::print(stderr, "send_set_report failure: failed to set PWM for pin 1\n");
+                if (!p1) {
+                    fmt::print(stderr, "{}: send_set_report failure: failed to set PWM for pin 1\n",
+                            __builtin_FUNCTION());
+                }
             }
-            if (static_cast<std::uint8_t>(color & Color::Blue) == 1u) {
+            if ((color & Color::Blue) == Color::Blue) {
                 msg.send.lsb = 2;
                 p2 = send_set_report(msg);
-                if (!p2)
-                    fmt::print(stderr, "send_set_report failure: failed to set PWM for pin 2\n");
+                if (!p2) {
+                    fmt::print(stderr, "{}: send_set_report failure: failed to set PWM for pin 2\n",
+                            __builtin_FUNCTION());
+                }
             }
         } catch (std::exception const& e) {
             throw std::runtime_error(fmt::format(
@@ -229,10 +235,12 @@ namespace delcom {
     {
         // Set up device by first turning off all leds and setting the
         // PWM to full (100) for each.
+
         if (!turn_led_off(Color::Red | Color::Green | Color::Blue)) {
             fmt::print(stderr, "{}: turn_led_off failure\n", __builtin_FUNCTION());
             return false;
         }
+
         if (!set_pwm(Color::Red | Color::Green | Color::Blue, initial_pwm_)) {
             fmt::print(stderr, "{}: set_pwm failure\n", __builtin_FUNCTION());
             return false;
