@@ -26,10 +26,11 @@ main(int argc, char** argv)
     int exit_code = EXIT_SUCCESS;
     try {
         using delcom::Color;
+
         delcom::vi_hid hid(args.vendor_id, args.product_id, args.debug);
         fmt::print("connected to device {:#06x}:{:#06x} ({})\n", hid.vendor_id(), hid.product_id(),
                 hid.read_firmware_info().str());
-        fmt::print("device state: [{}]\n", hid.read_ports_and_pins().str());
+        fmt::print("device state: [{}]\n", hid.read_pins().str());
 
         hid.turn_led_on(Color::Green);
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
@@ -40,14 +41,6 @@ main(int argc, char** argv)
         hid.turn_led_off(Color::Red);
 
         hid.turn_led_on(Color::Blue);
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        hid.turn_led_off(Color::Blue);
-
-        hid.turn_led_on(Color::Blue);
-        for (int i = 100; i >= 0; i -= 10) {
-            hid.set_led_intensity(Color::Blue, i);
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        }
 
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());
