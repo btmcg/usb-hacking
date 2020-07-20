@@ -195,7 +195,7 @@ namespace delcom {
             std::lock_guard l(threads_lock_);
 
             // clean up any joinable threads
-            std::erase_if(threads_, [](auto& t) { return t.joinable(); });
+            std::erase_if(threads_, [](auto& t) { return !t.joinable(); });
 
             threads_.emplace_back([this, color, duration_msecs]() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(duration_msecs));

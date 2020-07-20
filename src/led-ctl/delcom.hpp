@@ -101,7 +101,7 @@ namespace delcom {
         std::uint16_t interface_ = 0;
         std::size_t initial_pwm_ = 50; ///< half (50%)
         std::mutex threads_lock_;
-        std::vector<std::jthread> threads_;
+        std::vector<std::thread> threads_;
 
     public:
         vi_hid(std::uint16_t vendor_id, std::uint16_t product_id, bool debug = false);

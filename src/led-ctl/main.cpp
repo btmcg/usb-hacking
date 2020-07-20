@@ -33,7 +33,11 @@ main(int argc, char** argv)
                 hid.read_firmware_info().str());
         fmt::print("device state: [{}]\n", hid.read_port_data().str());
 
-        hid.turn_led_on(Color::Green);
+        hid.turn_led_on(Color::Green, 3000);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        hid.turn_led_on(Color::Red, 2000);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        hid.turn_led_on(Color::Blue, 1000);
 
         fmt::print("device state: [{}]\n", hid.read_port_data().str());
 
