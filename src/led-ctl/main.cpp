@@ -59,8 +59,16 @@ main(int argc, char** argv)
         fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
 
         hid.turn_led_on(Color::Green);
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        hid.turn_led_off(Color::Green);
+
         hid.turn_led_on(Color::Red);
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        hid.turn_led_off(Color::Red);
+
         hid.turn_led_on(Color::Blue);
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        hid.turn_led_off(Color::Blue);
 
         fmt::print("\n[{}]\n", hid.read_ports_and_pins().str());
     } catch (std::exception const& e) {
