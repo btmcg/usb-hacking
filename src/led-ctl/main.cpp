@@ -2,6 +2,7 @@
 #include "delcom.hpp"
 #include "util/assert.hpp"
 #include <fmt/core.h>
+#include <fmt/ostream.h> // for formatting std::thread_id
 #include <libusb.h>
 #include <chrono>
 #include <cstdint>
@@ -40,7 +41,12 @@ main(int argc, char** argv)
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
         hid.turn_led_off(Color::Red);
 
-        hid.turn_led_on(Color::Blue);
+        hid.turn_led_on(Color::Red, 3000);
+
+        hid.turn_led_on(Color::Green);
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+        hid.turn_led_off(Color::Green);
 
     } catch (std::exception const& e) {
         fmt::print(stderr, "exception: {}\n", e.what());

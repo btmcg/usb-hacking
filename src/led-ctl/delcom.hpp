@@ -6,7 +6,10 @@
 #include <libusb.h>
 #include <cstddef> // std::size_t
 #include <cstdint>
+#include <mutex>
+#include <thread>
 #include <tuple>
+#include <vector>
 
 
 namespace delcom {
@@ -99,6 +102,8 @@ namespace delcom {
         std::uint16_t product_id_ = 0;
         std::uint16_t interface_ = 0;
         std::size_t initial_pwm_ = 50; ///< half (50%)
+        std::mutex threads_lock_;
+        std::vector<std::jthread> threads_;
 
     public:
         vi_hid(std::uint16_t vendor_id, std::uint16_t product_id, bool debug = false);
@@ -110,7 +115,10 @@ namespace delcom {
         // clang-format on
 
         firmware_info read_firmware_info() const;
-        bool turn_led_on(Color) const;
+
+        /// A duration of 0 turns the light on until \c turn_led_off is
+        /// called. Returns immediately, regardless of duration.
+        bool turn_led_on(Color color, std::uint64_t duration_msecs = 0);
         bool turn_led_off(Color) const;
 
         /// Set led intensity, where 0 <= pct <= 100. Note that a pct of
@@ -124,6 +132,7 @@ namespace delcom {
 
     private:
         bool initialize_device() const;
+        bool led(bool enable, Color) const;
         bool set_pwm(Color, std::uint8_t) const;
         std::size_t send_get_report(packet&) const;
         bool send_set_report(packet const&) const;

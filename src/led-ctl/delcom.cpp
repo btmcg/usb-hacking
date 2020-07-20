@@ -131,10 +131,16 @@ namespace delcom {
             throw std::runtime_error(
                     fmt::format("{}: failed to initialized device", __builtin_FUNCTION()));
         }
-    } // namespace delcom
+    }
 
     vi_hid::~vi_hid() noexcept
     {
+        {
+            std::lock_guard l(threads_lock_);
+            for (auto& t : threads_)
+                t.join();
+        }
+
         if (int e = ::libusb_release_interface(dev_, interface_); e != LIBUSB_SUCCESS) {
             std::fprintf(stderr, "libusb: release_interface failure (%s)\n",
                     ::libusb_strerror(static_cast<libusb_error>(e)));
@@ -169,43 +175,29 @@ namespace delcom {
     }
 
     bool
-    vi_hid::turn_led_on(Color color) const
+    vi_hid::turn_led_on(Color color, std::uint64_t duration_msecs)
     {
-        // to turn an led on, we need to "reset" that color's pin (set
-        // it to 0)
+        bool success = led(true, color);
 
-        packet msg = {0};
-        msg.send.cmd = Command::Write8Bytes;
-        msg.send.write_cmd = WriteCommand::SetOrResetPort1;
-        msg.send.lsb = static_cast<std::uint8_t>(color); // pins to reset
-        msg.send.msb = 0; // pins to set
+        if (success && duration_msecs != 0) {
+            std::lock_guard l(threads_lock_);
 
-        try {
-            return send_set_report(msg);
-        } catch (std::exception const& e) {
-            throw std::runtime_error(fmt::format(
-                    "{}: send_set_report failure ({})", __builtin_FUNCTION(), e.what()));
+            // clean up any joinable threads
+            std::erase_if(threads_, [](auto& t) { return t.joinable(); });
+
+            threads_.emplace_back([this, color, duration_msecs]() {
+                std::this_thread::sleep_for(std::chrono::milliseconds(duration_msecs));
+                led(false, color);
+            });
         }
+
+        return success;
     }
 
     bool
     vi_hid::turn_led_off(Color color) const
     {
-        // to turn an led off, we need to "set" that color's pin (set it
-        // to 1)
-
-        packet msg = {0};
-        msg.send.cmd = Command::Write8Bytes;
-        msg.send.write_cmd = WriteCommand::SetOrResetPort1;
-        msg.send.lsb = 0; // pins to reset
-        msg.send.msb = static_cast<std::uint8_t>(color); // pins to set
-
-        try {
-            return send_set_report(msg);
-        } catch (std::exception const& e) {
-            throw std::runtime_error(fmt::format(
-                    "{}: send_set_report failure ({})", __builtin_FUNCTION(), e.what()));
-        }
+        return led(false, color);
     }
 
     bool
@@ -269,7 +261,7 @@ namespace delcom {
     vi_hid::initialize_device() const
     {
         // Set up device by first turning off all leds and setting the
-        // PWM to full (100) for each.
+        // PWM to the preferred initial value.
 
         if (!turn_led_off(Color::Red | Color::Green | Color::Blue)) {
             fmt::print(stderr, "{}: turn_led_off failure\n", __builtin_FUNCTION());
@@ -282,6 +274,33 @@ namespace delcom {
         }
 
         return true;
+    }
+
+    bool
+    vi_hid::led(bool enable, Color color) const
+    {
+        // to turn an led on, we need to "reset" that color's pin (set
+        // it to 0), and conversely, to turn an led off, "set" that pin
+        // (set it to 1)
+        //
+        // lsb are the pins that will be reset
+        // msb are the pins that will be set
+        // (resetting takes precedence)
+
+        packet msg = {0};
+        msg.send.cmd = Command::Write8Bytes;
+        msg.send.write_cmd = WriteCommand::SetOrResetPort1;
+        if (enable)
+            msg.send.lsb = static_cast<std::uint8_t>(color); // pins to reset
+        else
+            msg.send.msb = static_cast<std::uint8_t>(color); // pins to set
+
+        try {
+            return send_set_report(msg);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(fmt::format(
+                    "{}: send_set_report failure ({})", __builtin_FUNCTION(), e.what()));
+        }
     }
 
     bool
