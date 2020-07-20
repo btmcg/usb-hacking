@@ -165,7 +165,7 @@ namespace delcom {
     firmware_info
     vi_hid::read_firmware_info() const
     {
-        packet msg = {0};
+        packet msg;
         msg.recv.cmd = Command::ReadFirmware;
 
         try {
@@ -233,13 +233,17 @@ namespace delcom {
         // setting bit 6 of lsb disables AutoClear
         // (disabling takes precedence)
 
-        packet msg = {0};
+        packet msg;
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::AutoClearAutoConfirmCtrl;
-        if (!enable)
-            msg.send.lsb = (1ul << 6);
-        else
+
+        if (enable) {
+            msg.send.lsb = 0;
             msg.send.msb = (1ul << 6);
+        } else {
+            msg.send.lsb = (1ul << 6);
+            msg.send.msb = 0;
+        }
 
         try {
             return send_set_report(msg);
@@ -254,7 +258,7 @@ namespace delcom {
     port_data
     vi_hid::read_port_data() const
     {
-        packet msg = {0};
+        packet msg;
         msg.recv.cmd = Command::ReadPort0and1;
 
         try {
@@ -276,7 +280,7 @@ namespace delcom {
     std::tuple<std::uint32_t, bool>
     vi_hid::read_and_reset_event_counter() const
     {
-        packet msg = {0};
+        packet msg;
         msg.recv.cmd = Command::ReadEventCounter;
 
         try {
@@ -332,7 +336,7 @@ namespace delcom {
         // msb are the pins that will be set
         // (resetting takes precedence)
 
-        packet msg = {0};
+        packet msg;
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::SetOrResetPort1;
         if (enable)
@@ -356,7 +360,7 @@ namespace delcom {
         // value that refers to an LED pin (0, 1, 2), and a percentage
         // value from 0 to 100. Since each command accepts a single pin
         // to be changed, we need to send one message per pin/color.
-        packet msg = {0};
+        packet msg;
         msg.send.cmd = Command::Write8Bytes;
         msg.send.write_cmd = WriteCommand::SetPWM;
         msg.send.lsb = 0; // will be set to pin specified by 'color'

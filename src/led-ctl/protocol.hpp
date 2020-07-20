@@ -204,7 +204,7 @@ namespace delcom {
         /// member.
         union packet
         {
-            std::uint8_t data[8];
+            std::uint8_t data[8] = {0};
             recv_cmd recv;
             send_cmd send;
         } PACKED;
