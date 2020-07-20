@@ -24,7 +24,8 @@ namespace delcom {
             ReadEventCounter = 8,
 
             /// Reads the firmware information.
-            ///     Byte 0-3: Unique Device Serial Number. DWORD Little Endian.
+            ///     Byte 0-3: Unique Device Serial Number. DWORD Little
+            ///         Endian.
             ///     Byte 4: Firmware Version.
             ///     Byte 5: Firmware Date.
             ///     Byte 6: Firmware Month.
@@ -173,13 +174,9 @@ namespace delcom {
 
             /// Auto Clear & Auto Confirm Control. This command
             /// enables/disables the Auto Clear and Auto Confirm
-            /// feature. Bit 6 of the DataLSB controls the Auto Clear
-            /// feature and bit 7 controls the Auto Confirm feature. A
-            /// high value enables the feature and low disables it. When
-            /// enabled, the auto clear control will turn off all the
-            /// LED pins when the internal switch (P0.0) is pressed.
-            /// When enabled, auto confirm control will sound two quick
-            /// buzzer tones to indicate that the switch was pressed.
+            /// feature. Setting bit 6 of the DataLSB enables the Auto
+            /// Clear feature and setting bit 6 of DataMSB disables it.
+            /// Disabling takes precedence.
             AutoClearAutoConfirmCtrl = 72,
         };
 
@@ -207,7 +204,7 @@ namespace delcom {
         /// member.
         union packet
         {
-            std::uint8_t data[8] = {0};
+            std::uint8_t data[8];
             recv_cmd recv;
             send_cmd send;
         } PACKED;
@@ -236,23 +233,23 @@ namespace delcom {
         constexpr char const*
         to_str(Command e)
         {
+            // clang-format off
             switch (e) {
-                // clang-format off
                 case Command::ReadEventCounter: return "ReadEventCounter";
                 case Command::ReadFirmware:     return "ReadFirmware";
                 case Command::ReadPort0and1:    return "ReadPort0and1";
                 case Command::Write8Bytes:      return "Write8Bytes";
                 case Command::Write16Bytes:     return "Write16Bytes";
-                    // clang-format on
             }
+            // clang-format on
             return "<unknown>";
         }
 
         constexpr char const*
         to_str(WriteCommand e)
         {
+            // clang-format off
             switch (e) {
-                // clang-format off
                 case WriteCommand::Port0:                           return "Port0";
                 case WriteCommand::Port1:                           return "Port1";
                 case WriteCommand::Port0and1:                       return "Port0and1";
@@ -272,8 +269,8 @@ namespace delcom {
                 case WriteCommand::ToggleEventCounter:              return "ToggleEventCounter";
                 case WriteCommand::BuzzerCtrl:                      return "BuzzerCtrl";
                 case WriteCommand::AutoClearAutoConfirmCtrl:        return "AutoClearAutoConfirmCtrl";
-                    // clang-format on
             }
+            // clang-format on
             return "<unknown>";
         }
 

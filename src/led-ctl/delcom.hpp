@@ -115,7 +115,6 @@ namespace delcom {
         /// called. Returns immediately, regardless of duration.
         bool turn_led_on(Color color, std::uint64_t duration_msecs = 0);
         bool turn_led_off(Color) const;
-
         bool turn_off_leds_on_button_press(bool enable) const;
 
         /// Set led intensity, where 0 <= pct <= 100. Note that a pct of
