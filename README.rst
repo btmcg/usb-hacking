@@ -4,17 +4,17 @@ usb-hacking
 
 Tools and experimental code to interface with USB on Linux.
 
+``led-ctl``
+    An application that controls a `Delcom USB HID Visual Signal
+    Indicator
+    <https://www.delcomproducts.com/productdetails.asp?PartNumber=904000-S>`_.
+    Uses `libusb <https://libusb.info/>`_.
 
 ``lsusb2``
     Lists properties and attributes of currently-connected USB devices.
     This is a custom implementation using `libusb
     <https://libusb.info/>`_ that mimics the behavior of ``lsusb``.
 
-``led-ctl``
-    An application that controls a `Delcom USB HID Visual Signal
-    Indicator
-    <https://www.delcomproducts.com/productdetails.asp?PartNumber=904000-S>`_.
-    Uses `libusb <https://libusb.info/>`_.
 
 
 Cloning repo and submodules
