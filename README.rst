@@ -51,8 +51,8 @@ build options
     assertions included.
 
 ``make DEBUG=1 COMPILER=clang test -j``
-    Build only the test target (and dependencies) with no optimizations
-    and debug assertions included.
+    Using clang, build only the test target (and dependencies) with no
+    optimizations and debug assertions included.
 
 
 Development
