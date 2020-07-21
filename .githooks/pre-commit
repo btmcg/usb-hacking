@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Pre-commit hook for enforcing style guidelines via clang-format.
+# Returns 1 if any staged files generate clang-format warnings
+# Returns 0 otherwise
+
+# To enable this hook, from inside the repository, run
+#       git config --local core.hooksPath .githooks
+
+changed_files=$(git diff-index --cached --name-only HEAD | grep --extended-regexp '\.(c|h|cpp|hpp)')
+
+rc=0
+for file in ${changed_files}; do
+    output=$(clang-format --dry-run "${file}" 2>&1)
+
+    if [ -n "${output}" ]; then
+        rc=1
+        echo "${output}" >&2
+    fi
+done
+
+exit ${rc}

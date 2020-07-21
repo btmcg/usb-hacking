@@ -39,6 +39,15 @@ use
     ``make DEBUG=1 COMPILER=clang test -j``
 
 
+Enable git hooks
+----------------
+
+From within the repository, run
+
+    ``git config --local core.hooksPath .githooks``
+
+
+
 Installing and maintaining third-party libraries
 ------------------------------------------------
 
