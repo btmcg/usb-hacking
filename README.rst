@@ -38,18 +38,21 @@ Building and running
 build options
 -------------
 
-The default compiler is set to gcc. To build with clang, use
+``make -j``
+    Using gcc, build all targets with full optimizations, including
+    benchmarks and tests (if available).
 
-    ``make COMPILER=clang -j``
+``make COMPILER=clang -j``
+    Using clang, build all targets with full optimizations, including
+    benchmarks and tests (if available).
 
-To build with debugging assertions built in, use
+``make DEBUG=1 -j``
+    Using gcc, build all targets with no optimizations and debug
+    assertions included.
 
-    ``make DEBUG=1 -j``
-
-For example, to build only the tests, using clang, and with debug code,
-use
-
-    ``make DEBUG=1 COMPILER=clang test -j``
+``make DEBUG=1 COMPILER=clang test -j``
+    Build only the test target (and dependencies) with no optimizations
+    and debug assertions included.
 
 
 Development
