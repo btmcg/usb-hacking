@@ -1,29 +1,45 @@
+###########
 usb-hacking
-===========
+###########
 
-Tools and experimental code to use USB on Linux.
+Tools and experimental code to interface with USB on Linux.
+
+
+Tools
+=====
+
+lsusb2
+------
+
+Lists properties and attributes of currently-connected USB devices. This is a custom implementation using `libusb <https://libusb.info/>`_ that mimics the behavior of ``lsusb``.
+
+led-ctl
+-------
+An application that controls a `Delcom USB HID Visual Signal Indicator
+<https://www.delcomproducts.com/productdetails.asp?PartNumber=904000-S>`_.
+Uses `libusb <https://libusb.info/>`_.
 
 
 Cloning repo and submodules
----------------------------
+===========================
 
 .. code-block::
 
-   git clone --recursive https://gitlab.com/btmcg/protocol-parser.git
+   git clone --recursive https://gitlab.com/btmcg/usb-hacking.git
 
 or
 
 .. code-block::
 
-   git clone https://gitlab.com/btmcg/protocol-parser.git
+   git clone https://gitlab.com/btmcg/usb-hacking.git
    git submodule update --init --recursive
 
 
 Building and running
---------------------
+====================
 
 build options
-~~~~~~~~~~~~~
+-------------
 
 The default compiler is set to gcc. To build with clang, use
 
@@ -39,72 +55,7 @@ use
     ``make DEBUG=1 COMPILER=clang test -j``
 
 
-Enable git hooks
-----------------
+Development
+===========
 
-From within the repository, run
-
-    ``git config --local core.hooksPath .githooks``
-
-
-
-Installing and maintaining third-party libraries
-------------------------------------------------
-
-catch
-~~~~~
-
-**Add new submodule**
-
-.. code-block::
-
-    git submodule add -- https://github.com/catchorg/Catch2.git third_party/catch2/2.12.2
-    cd third_party/catch2/2.12.2
-    git checkout v2.12.2
-
-
-**Remove old submodule**
-
-.. code-block::
-
-    vim .gitmodules
-    vim .git/config
-    git add .gitmodules
-    git rm --cached third_party/catch2/2.12.1
-    rm -rf .git/modules/third_party/catch2/2.12.1
-    rm -rf third_party/catch2/2.12.1
-
-**Point makefile to new version**
-
-.. code-block::
-
-    vim nrmake/third_party.mk
-
-
-fmt
-~~~
-
-**Add new submodule**
-
-.. code-block::
-
-    git submodule add -- https://github.com/fmtlib/fmt.git third_party/fmt/7.0.0
-    cd third_party/fmt/7.0.0
-    git checkout 7.0.0
-
-**Remove old submodule**
-
-.. code-block::
-
-    vim .gitmodules
-    vim .git/config
-    git add .gitmodules
-    git rm --cached third_party/fmt/6.2.1
-    rm -rf .git/modules/third_party/fmt/6.2.1
-    rm -rf third_party/fmt/6.2.1
-
-**Point makefile to new version**
-
-.. code-block::
-
-    vim nrmake/third_party.mk
+See `README.dev <README.dev.rst>`_.
