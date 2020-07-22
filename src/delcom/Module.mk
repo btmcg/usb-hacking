@@ -88,6 +88,6 @@ MODULE_CPPFLAGS := \
   -DKBUILD_BASENAME='"delcom"' \
   -DKBUILD_MODNAME='"delcom"'
 
-MODULE_CFLAGS :=
+MODULE_CFLAGS := -Wno-unused-parameter
 
 $(call add-static-library-module,$(call get-path))
