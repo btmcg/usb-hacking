@@ -90,4 +90,17 @@ MODULE_CPPFLAGS := \
 
 MODULE_CFLAGS := -Wno-unused-parameter
 
+# Step 1
+# make -f /usr/lib/modules/5.7.9-arch1-1/build/scripts/Makefile.build obj=/home/brian/src/kernel-module single-build= need-builtin=1 need-modorder=1
+#  { echo /home/brian/src/kernel-module/delcom.ko; :; } | awk '!x[$0]++' - > /home/brian/src/kernel-module/modules.order
+#  { echo /home/brian/src/kernel-module/delcom.o; echo; } > /home/brian/src/kernel-module/delcom.mod
+#
+#
+# Step 2 - create delcom.mod.c
+# /usr/lib/modules/5.7.9-arch1-1/build/scripts/mod/modpost -a delcom.o
+#
+#
+# Step 3 - convert .o into .ko
+# ld -r -m elf_x86_64  -z max-page-size=0x200000 --build-id  -T /usr/lib/modules/5.7.9-arch1-1/build/scripts/module-common.lds -o /home/brian/src/kernel-module/delcom.ko /home/brian/src/kernel-module/delcom.o /home/brian/src/kernel-module/delcom.mod.o
+
 $(call add-static-library-module,$(call get-path))
