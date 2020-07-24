@@ -1,8 +1,9 @@
 # dependency files
 *.d
 
-# bin/lib output dirs
+# dist dirs
 bin/
+include/
 lib/
 
 # compiled object files
@@ -14,7 +15,7 @@ lib/
 tags
 
 # build system artifacts
-src/version.hpp
+src/version.h
 benchmark/benchmark-runner
 test/test-runner
 
