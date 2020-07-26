@@ -1,6 +1,6 @@
 #pragma once
 
-#include "version.hpp"
+#include "version.h"
 #include "util/compiler.hpp"
 #include <filesystem>
 #include <getopt.h>
