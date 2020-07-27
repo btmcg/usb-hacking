@@ -85,8 +85,8 @@ MODULE_CPPFLAGS := \
   -DSTRUCTLEAK_PLUGIN \
   -DCC_USING_FENTRY \
   -DMODULE \
-  -DKBUILD_BASENAME='"delcom"' \
-  -DKBUILD_MODNAME='"delcom"'
+  -DKBUILD_BASENAME='"delcom_vi_hid"' \
+  -DKBUILD_MODNAME='"delcom_vi_hid"'
 
 MODULE_CFLAGS := -Wno-unused-parameter
 
