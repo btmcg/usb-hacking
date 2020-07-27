@@ -6,6 +6,7 @@
  */
 
 #include <linux/errno.h>
+#include <linux/hid.h>
 #include <linux/kernel.h>
 #include <linux/kref.h>
 #include <linux/module.h>
@@ -28,6 +29,12 @@ static const struct usb_device_id id_table[] = {
     {},
 };
 MODULE_DEVICE_TABLE(usb, id_table);
+
+static const struct hid_device_id hid_table[] = {
+    { HID_USB_DEVICE(VENDOR_ID, PRODUCT_ID) },
+    {},
+};
+MODULE_DEVICE_TABLE(hid, hid_table);
 /* clang-format on */
 
 
