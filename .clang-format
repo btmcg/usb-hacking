@@ -2,9 +2,10 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: true
 AlignEscapedNewlines: Left
 AlignOperands: false
-AlignTrailingComments: false
+AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
@@ -16,6 +17,7 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
 BinPackParameters: true
+# BitFieldColonSpacing: Both
 BraceWrapping:
     AfterClass: true
     AfterControlStatement: false
@@ -96,6 +98,6 @@ SpacesInCStyleCastParentheses: false
 SpacesInSquareBrackets: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
-Standard: Cpp11
+Standard: Latest
 TabWidth: 4
 UseTab: Never

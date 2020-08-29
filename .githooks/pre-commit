@@ -7,7 +7,7 @@
 # To enable this hook, from inside the repository, run
 #       git config --local core.hooksPath .githooks
 
-changed_files=$(git diff-index --cached --name-only HEAD | grep --extended-regexp '\.(c|h|cpp|hpp)')
+changed_files=$(git diff-index --cached --name-only --diff-filter=d HEAD | grep --extended-regexp '\.(c|h|cpp|hpp)$')
 
 rc=0
 for file in ${changed_files}; do
