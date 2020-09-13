@@ -240,6 +240,7 @@ namespace delcom {
                 case Command::ReadPort0and1:    return "ReadPort0and1";
                 case Command::Write8Bytes:      return "Write8Bytes";
                 case Command::Write16Bytes:     return "Write16Bytes";
+                default: break;
             }
             // clang-format on
             return "<unknown>";
@@ -269,6 +270,7 @@ namespace delcom {
                 case WriteCommand::ToggleEventCounter:              return "ToggleEventCounter";
                 case WriteCommand::BuzzerCtrl:                      return "BuzzerCtrl";
                 case WriteCommand::AutoClearAutoConfirmCtrl:        return "AutoClearAutoConfirmCtrl";
+                default: break;
             }
             // clang-format on
             return "<unknown>";
