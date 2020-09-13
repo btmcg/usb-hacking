@@ -52,6 +52,7 @@ to_str(libusb_class_code e) noexcept
         case LIBUSB_CLASS_WIRELESS:             return "wireless";
         case LIBUSB_CLASS_APPLICATION:          return "application";
         case LIBUSB_CLASS_VENDOR_SPEC:          return "vendor-specific";
+        default: break;
     }
     // clang-format on
 
@@ -65,6 +66,7 @@ to_str(libusb_endpoint_direction e) noexcept
     switch (e) {
         case LIBUSB_ENDPOINT_IN:    return "(in) host-to-device";
         case LIBUSB_ENDPOINT_OUT:   return "(out) device-to-host";
+        default: break;
     }
     // clang-format on
 
@@ -80,6 +82,7 @@ to_str(libusb_iso_sync_type e) noexcept
         case LIBUSB_ISO_SYNC_TYPE_ASYNC:    return "asynchronous";
         case LIBUSB_ISO_SYNC_TYPE_ADAPTIVE: return "adaptive";
         case LIBUSB_ISO_SYNC_TYPE_SYNC:     return "synchronous";
+        default: break;
     }
     // clang-format on
 
@@ -94,6 +97,7 @@ to_str(libusb_iso_usage_type e) noexcept
         case LIBUSB_ISO_USAGE_TYPE_DATA:        return "data endpoint";
         case LIBUSB_ISO_USAGE_TYPE_FEEDBACK:    return "feedback endpoint";
         case LIBUSB_ISO_USAGE_TYPE_IMPLICIT:    return "implicit feedback endpoint";
+        default: break;
     }
     // clang-format on
     return "<unknown>";
@@ -110,6 +114,7 @@ to_str(libusb_speed e) noexcept
         case LIBUSB_SPEED_HIGH:         return "high (480 MBit/s)";
         case LIBUSB_SPEED_SUPER:        return "super (5000 MBit/s)";
         case LIBUSB_SPEED_SUPER_PLUS:   return "super plus (10000 MBit/s)";
+        default: break;
     }
     // clang-format on
 
@@ -126,6 +131,7 @@ to_str(libusb_transfer_type e) noexcept
         case LIBUSB_TRANSFER_TYPE_BULK:         return "bulk";
         case LIBUSB_TRANSFER_TYPE_INTERRUPT:    return "interrupt";
         case LIBUSB_TRANSFER_TYPE_BULK_STREAM:  return "stream";
+        default: break;
     }
     // clang-format on
 
